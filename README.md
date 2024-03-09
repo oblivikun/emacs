@@ -1,7 +1,7 @@
 ### emacs
 _____________________________
-a more minimal and actually usable emacs config
-i cannot write a readme
+a more minimal and actually usable emacs config  
+(i cannot write a readme)
 
  fast startup(3s on emacs JIT with gentoo)
  lsp stuff  
