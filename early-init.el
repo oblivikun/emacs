@@ -19,7 +19,7 @@
 
 (defvar me/gc-cons-threshold 80000000000)
 (setq gc-cons-threshold most-positive-fixnum
-      gc-cons-percentage 0.93)
+      gc-cons-percentage 0.875)
 (add-hook 'emacs-startup-hook
           (lambda ()
             (setq gc-cons-threshold me/gc-cons-threshold

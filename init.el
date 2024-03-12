@@ -1,6 +1,7 @@
  ;;; package -- summary
 ;;; Commentary:
 ;;; Code:
+(setq gc-cons-threshold (* 64 1000 1000))
 
 (setq initial-major-mode 'fundamental-mode)
 (setq initial-scratch-message 'nil)
@@ -15,8 +16,13 @@
 (add-hook 'emacs-startup-hook
 	      (lambda ()
 	        (setq gc-cons-threshold 16777216) ; 16mb
-	        (setq gc-cons-percentage 0.1)
+	        (setq gc-cons-percentage 0.2)
 	        (require 'gcmh)
+		            (message "Emacs ready in %s with %d garbage collections."
+                     (format "%.2f seconds"
+                             (float-time
+                             (time-subtract after-init-time before-init-time)))
+                     gcs-done)
 		;; (load-theme 'gruvbox-dark-medium) i now embrace light theme
 		(load-theme 'gruvbox-light-medium)
 	        (gcmh-mode 1)))
@@ -34,6 +40,7 @@
  (package-initialize))
 (setenv "IN_EMACS" "1")
 (use-package keycast
+  :defer t
   :ensure t
   :config
   (keycast-tab-bar-mode))
@@ -65,9 +72,13 @@
  ;; Set the title
  (setq dashboard-banner-logo-title "Oblivikun Emacs")
  ;; Set the banner
- (setq dashboard-startup-banner 'logo)
+ (setq dashboard-startup-banner (expand-file-name "branding/logo.png" user-emacs-directory))
+
  (setq dashboard-center-content t)
+(setq dashboard-display-icons-p t)     ; display icons on both GUI and terminal
+(setq dashboard-icon-type 'nerd-icons) ; use `nerd-icons' package
  ;; vertically center content
+ ; use `nerd-icons' package
  (setq dashboard-filter-agenda-entry 'dashboard-no-filter-agenda)
  (setq dashboard-vertically-center-content t))
 (global-set-key (kbd "M-0") 'treemacs)
@@ -95,6 +106,7 @@
 ))
 
 (use-package lsp-mode
+  :defer t
   :init
   ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
   (setq lsp-keymap-prefix "C-c l")
@@ -179,9 +191,42 @@
 ;; Make Org mode the default for .org files
 ;; This line is usually the default in recent Emacs versions
 (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
-;; Fixes load-path issues
-
+(use-package org-roam
+  :ensure t
+  :custom
+  (org-roam-directory (file-truename "~/roam/"))
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n g" . org-roam-graph)
+         ("C-c n i" . org-roam-node-insert)
+         ("C-c n c" . org-roam-capture)
+         ;; Dailies
+         ("C-c n j" . org-roam-dailies-capture-today)))
+  :config
+  ;; If you're using a vertical completion framework, you might want a more informative completion interface
+  (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+  (org-roam-db-autosync-mode)
 ;; Make Emacs Bearable
+(defun loadup-gen ()
+ "Generate the lines to include in the lisp/loadup.el file
+to place all of the libraries that are loaded by your InitFile
+into the main dumped emacs"
+ (interactive)
+ (defun get-loads-from-*Messages* ()
+    (save-excursion
+      (let ((retval ()))
+        (set-buffer "*Messages*")
+        (beginning-of-buffer)
+        (while (search-forward-regexp "^Loading " nil t)
+          (let ((start (point)))
+            (search-forward "...")
+            (backward-char 3)
+            (setq retval (cons (buffer-substring-no-properties start (point)) retval))))
+        retval)))
+ (dolist (file (get-loads-from-*Messages*))
+    (princ (format "(load \"%s\")\n" file))))
+
+
 (defun dump-load-path ()
   (with-temp-buffer
     (insert (prin1-to-string `(setq load-path ',load-path)))
@@ -306,7 +351,7 @@
 (setq rcirc-notify-message "message from %s")
 
 
-
+(setq message-send-mail-function 'smtpmail-send-it)
 ;; Git
 (setq magit-define-global-key-bindings nil)
 ;; tab bar
@@ -367,6 +412,7 @@
     (display-buffer discord-buffer nil)))
 
 (use-package exwm
+  :defer t
  :if (and (display-graphic-p)
            (executable-find "wmctrl")
            (not (get-buffer "*window-manager*")))
@@ -382,6 +428,7 @@
 
 
 (use-package system-packages
+  :defer t
   :config
  (setq system-packages-use-sudo t)
  (setq system-packages-package-manager 'emerge))
@@ -400,7 +447,8 @@
  '(custom-safe-themes
    '("3e374bb5eb46eb59dbd92578cae54b16de138bc2e8a31a2451bf6fdb0f3fd81b" "72ed8b6bffe0bfa8d097810649fd57d2b598deef47c992920aef8b5d9599eefe" "d80952c58cf1b06d936b1392c38230b74ae1a2a6729594770762dc0779ac66b7" "2ff9ac386eac4dffd77a33e93b0c8236bb376c5a5df62e36d4bfa821d56e4e20" default))
  '(package-selected-packages
-   '(nerd-icons-dired nerd-icons-completion nerd-icons-ivy-rich gruvbox-dark-medium gruvbox-themes gcmh snapshot-timemachine project-treemacs treemacs-projectile treemacs-nerd-icons company-jedi counsel bongo exwm system-packages restart-emacs org-download undo-tree haskell-snippets ivy projectile magit rcirc-notify elcord auctex flycheck org-agenda-files-track-ql org-agenda-property org-agenda-files-track org-contrib dashboard aggressive-indent spaceline powerline lsp-haskell lsp-latex lsp-ui gruvbox-theme company)))
+   '(all-the-icons-gnus spaceline-all-the-icons octicons all-the-icons-ivy all-the-icons-nerd-fonts org-roam-ui nerd-icons-dired nerd-icons-completion nerd-icons-ivy-rich gruvbox-dark-medium gruvbox-themes gcmh snapshot-timemachine project-treemacs treemacs-projectile treemacs-nerd-icons company-jedi counsel bongo exwm system-packages restart-emacs org-download undo-tree haskell-snippets ivy projectile magit rcirc-notify elcord auctex flycheck org-agenda-files-track-ql org-agenda-property org-agenda-files-track org-contrib dashboard aggressive-indent spaceline powerline lsp-haskell lsp-latex lsp-ui gruvbox-theme company))
+ '(send-mail-function 'mailclient-send-it))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
