@@ -469,6 +469,11 @@ into the main dumped emacs"
 (add-hook 'markdown-mode-hook
           (lambda ()
             (local-set-key (kbd "C-c C-o") 'markdown-export-to-html-and-open-in-nyxt)))
+(use-package indent-guide
+ :ensure t
+ :hook (python-mode . indent-guide-mode)
+ :config
+ (set-face-background 'indent-guide-face "gray")) ; Set the color of the indent guides
 
 
 (custom-set-variables
@@ -480,7 +485,7 @@ into the main dumped emacs"
  '(custom-safe-themes
    '("3e374bb5eb46eb59dbd92578cae54b16de138bc2e8a31a2451bf6fdb0f3fd81b" "72ed8b6bffe0bfa8d097810649fd57d2b598deef47c992920aef8b5d9599eefe" "d80952c58cf1b06d936b1392c38230b74ae1a2a6729594770762dc0779ac66b7" "2ff9ac386eac4dffd77a33e93b0c8236bb376c5a5df62e36d4bfa821d56e4e20" default))
  '(package-selected-packages
-   '(grip-mode org-preview-html which-key keycast treemacs-tab-bar bbdb- counsel-bbdb all-the-icons-gnus spaceline-all-the-icons octicons all-the-icons-ivy all-the-icons-nerd-fonts org-roam-ui nerd-icons-dired nerd-icons-completion nerd-icons-ivy-rich gruvbox-dark-medium gruvbox-themes gcmh snapshot-timemachine project-treemacs treemacs-projectile treemacs-nerd-icons company-jedi counsel bongo exwm system-packages restart-emacs org-download undo-tree haskell-snippets ivy projectile magit rcirc-notify elcord auctex flycheck org-agenda-files-track-ql org-agenda-property org-agenda-files-track org-contrib dashboard aggressive-indent spaceline powerline lsp-haskell lsp-latex lsp-ui gruvbox-theme company))
+   '(indent-guide grip-mode org-preview-html which-key keycast treemacs-tab-bar bbdb- counsel-bbdb all-the-icons-gnus spaceline-all-the-icons octicons all-the-icons-ivy all-the-icons-nerd-fonts org-roam-ui nerd-icons-dired nerd-icons-completion nerd-icons-ivy-rich gruvbox-dark-medium gruvbox-themes gcmh snapshot-timemachine project-treemacs treemacs-projectile treemacs-nerd-icons company-jedi counsel bongo exwm system-packages restart-emacs org-download undo-tree haskell-snippets ivy projectile magit rcirc-notify elcord auctex flycheck org-agenda-files-track-ql org-agenda-property org-agenda-files-track org-contrib dashboard aggressive-indent spaceline powerline lsp-haskell lsp-latex lsp-ui gruvbox-theme company))
  '(send-mail-function 'mailclient-send-it))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
