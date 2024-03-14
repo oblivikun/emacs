@@ -566,6 +566,25 @@ into the main dumped emacs"
   :config
  (setq system-packages-use-sudo t)
  (setq system-packages-package-manager 'emerge))
+;; more hydra stuff for org
+(defhydra hydra-org-export-and-view ()
+ "Export and view"
+ ("h" (org-html-export-to-html) "Export to HTML")
+ ("o" (org-export-to-html-and-open-in-nyxt) "Open in Nyxt")
+ ("l" (org-latex-export-to-latex) "Export to LaTeX")
+ ("b" (org-beamer-export-to-latex) "Export to Beamer")
+ ("q" nil "quit"))
+(define-key org-mode-map (kbd "C-c C-e") 'hydra-org-export-and-view/body)
+
+(defun org-export-to-html-and-open-in-nyxt ()
+ "Export the current Org file to HTML and open it in Nyxt."
+ (interactive)
+ (let ((html-file (org-html-export-to-html)))
+    (start-process "Nyxt" nil "nyxt" html-file)
+    (add-hook 'kill-emacs-hook
+              (lambda ()
+                (when (get-process "Nyxt")
+                 (delete-process (get-process "Nyxt")))))))
 
 ;; For writing org files, change nyxt to browser of choice
 (defun org-export-to-html-and-open-in-nyxt ()
@@ -616,9 +635,9 @@ into the main dumped emacs"
  ;; If there is more than one, they won't work right.
  '(codeium/metadata/api_key "f41f1615-8f88-453d-bb87-5a6bc3e329bf")
  '(custom-safe-themes
-   '("3e374bb5eb46eb59dbd92578cae54b16de138bc2e8a31a2451bf6fdb0f3fd81b" "72ed8b6bffe0bfa8d097810649fd57d2b598deef47c992920aef8b5d9599eefe" "d80952c58cf1b06d936b1392c38230b74ae1a2a6729594770762dc0779ac66b7" "2ff9ac386eac4dffd77a33e93b0c8236bb376c5a5df62e36d4bfa821d56e4e20" default))
+   '("98ef36d4487bf5e816f89b1b1240d45755ec382c7029302f36ca6626faf44bbd" "3e374bb5eb46eb59dbd92578cae54b16de138bc2e8a31a2451bf6fdb0f3fd81b" "72ed8b6bffe0bfa8d097810649fd57d2b598deef47c992920aef8b5d9599eefe" "d80952c58cf1b06d936b1392c38230b74ae1a2a6729594770762dc0779ac66b7" "2ff9ac386eac4dffd77a33e93b0c8236bb376c5a5df62e36d4bfa821d56e4e20" default))
  '(package-selected-packages
-   '(gmail2bbdb ivy-hydra use-package-hydra indent-guide grip-mode org-preview-html which-key keycast treemacs-tab-bar bbdb- counsel-bbdb all-the-icons-gnus spaceline-all-the-icons octicons all-the-icons-ivy all-the-icons-nerd-fonts org-roam-ui nerd-icons-dired nerd-icons-completion nerd-icons-ivy-rich gruvbox-dark-medium gruvbox-themes gcmh snapshot-timemachine project-treemacs treemacs-projectile treemacs-nerd-icons company-jedi counsel exwm system-packages restart-emacs org-download undo-tree haskell-snippets ivy projectile magit rcirc-notify elcord auctex flycheck org-agenda-files-track-ql org-agenda-property org-agenda-files-track org-contrib dashboard aggressive-indent spaceline powerline lsp-haskell lsp-latex lsp-ui gruvbox-theme company))
+   '(dianyou gmail2bbdb ivy-hydra use-package-hydra indent-guide grip-mode org-preview-html which-key keycast treemacs-tab-bar bbdb- counsel-bbdb all-the-icons-gnus spaceline-all-the-icons octicons all-the-icons-ivy all-the-icons-nerd-fonts org-roam-ui nerd-icons-dired nerd-icons-completion nerd-icons-ivy-rich gruvbox-dark-medium gruvbox-themes gcmh snapshot-timemachine project-treemacs treemacs-projectile treemacs-nerd-icons company-jedi counsel exwm system-packages restart-emacs org-download undo-tree haskell-snippets ivy projectile magit rcirc-notify elcord auctex flycheck org-agenda-files-track-ql org-agenda-property org-agenda-files-track org-contrib dashboard aggressive-indent spaceline powerline lsp-haskell lsp-latex lsp-ui gruvbox-theme company))
  '(send-mail-function 'mailclient-send-it))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

@@ -1,0 +1,5 @@
+* Default
+** .emacs.d
+ - path :: ~/.emacs.d
+** homework
+ - path :: ~/Documents/homework

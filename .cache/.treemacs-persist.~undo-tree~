@@ -1,0 +1,93 @@
+(undo-tree-save-format-version . 1)
+"993bb09223d0d5d2229f41124507f438d7cf1707"
+[nil nil nil nil (26095 3716 496193 659000) 0 nil]
+([nil nil ((1 . 45) (t . -1)) nil (26095 3716 496186 726000) 0 nil])
+([nil nil ((1 . 45) ("* Default
+** .emacs.d
+ - path :: ~/.emacs.d
+" . 1) (t 26095 3716 503986 468000)) nil (26095 3756 242264 193000) 0 nil])
+([nil nil ((1 . 45) ("* Default
+** .emacs.d
+ - path :: ~/.emacs.d
+" . 1) (t 26095 3756 246271 927000)) nil (26095 4006 37028 42000) 0 nil])
+([nil nil ((1 . 45) ("* Default
+** .emacs.d
+ - path :: ~/.emacs.d
+" . 1) (t 26095 4006 38735 422000)) nil (26095 4184 846725 809000) 0 nil])
+([nil nil ((1 . 89) ("* Default
+** .emacs.d
+ - path :: ~/.emacs.d
+" . 1) (t 26095 4184 848663 681000)) nil (26095 4693 477105 178000) 0 nil])
+([nil nil ((1 . 89) ("* Default
+** .emacs.d
+ - path :: ~/.emacs.d
+** homework
+ - path :: ~/Documents/homework
+" . 1) (t 26096 26300 322141 53000)) nil (26096 44226 822006 512000) 0 nil])
+([nil nil ((1 . 89) ("* Default
+** .emacs.d
+ - path :: ~/.emacs.d
+** homework
+ - path :: ~/Documents/homework
+" . 1) (t 26096 44226 823476 435000)) nil (26097 43972 509901 149000) 0 nil])
+([nil nil ((1 . 89) ("* Default
+** .emacs.d
+ - path :: ~/.emacs.d
+** homework
+ - path :: ~/Documents/homework
+" . 1) (t 26097 43972 513287 413000)) nil (26097 63399 48689 616000) 0 nil])
+([nil nil ((1 . 89) ("* Default
+** .emacs.d
+ - path :: ~/.emacs.d
+** homework
+ - path :: ~/Documents/homework
+" . 1) (t 26097 63399 50880 542000)) nil (26097 63458 935336 362000) 0 nil])
+([nil nil ((1 . 89) ("* Default
+** .emacs.d
+ - path :: ~/.emacs.d
+** homework
+ - path :: ~/Documents/homework
+" . 1) (t 26097 63458 937520 365000)) nil (26099 1565 418714 110000) 0 nil])
+([nil nil ((1 . 89) ("* Default
+** .emacs.d
+ - path :: ~/.emacs.d
+** homework
+ - path :: ~/Documents/homework
+" . 1) (t 26099 1565 421814 277000)) nil (26099 1626 832197 333000) 0 nil])
+([nil nil ((1 . 89) ("* Default
+** .emacs.d
+ - path :: ~/.emacs.d
+** homework
+ - path :: ~/Documents/homework
+" . 1) (t 26099 1626 834942 878000)) nil (26099 1803 711314 536000) 0 nil])
+([nil nil ((1 . 89) ("* Default
+** .emacs.d
+ - path :: ~/.emacs.d
+** homework
+ - path :: ~/Documents/homework
+" . 1) (t 26099 1803 714418 503000)) nil (26099 12121 445650 103000) 0 nil])
+([nil nil ((1 . 89) ("* Default
+** .emacs.d
+ - path :: ~/.emacs.d
+** homework
+ - path :: ~/Documents/homework
+" . 1) (t 26099 12121 448755 282000)) nil (26099 13597 894912 541000) 0 nil])
+([nil nil ((1 . 89) ("* Default
+** .emacs.d
+ - path :: ~/.emacs.d
+** homework
+ - path :: ~/Documents/homework
+" . 1) (t 26099 13597 898261 35000)) nil (26099 13948 386699 324000) 0 nil])
+([nil nil ((1 . 89) ("* Default
+** .emacs.d
+ - path :: ~/.emacs.d
+** homework
+ - path :: ~/Documents/homework
+" . 1) (t 26099 13948 390139 949000)) nil (26099 14142 933446 491000) 0 nil])
+([nil current ((1 . 89) ("* Default
+** .emacs.d
+ - path :: ~/.emacs.d
+** homework
+ - path :: ~/Documents/homework
+" . 1) (t 26099 14142 935816 639000)) nil (26099 14286 301007 371000) 0 nil])
+nil

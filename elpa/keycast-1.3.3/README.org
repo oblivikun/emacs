@@ -1,0 +1,24 @@
+* Show current command and its binding
+
+This package provides four modes that display the current command and
+its key or mouse binding.
+
+- ~keycast-mode-line-mode~ shows the current binding at the bottom of
+  the selected window, in its mode line.
+
+- ~keycast-header-line-mode~ shows the current binding at the top of
+  the selected window, in its header line.
+
+- ~keycast-tab-bar-mode~ shows the current binding at the top of
+  the selected frame, in its tab bar.
+
+- ~keycast-log-mode~ displays a list of recent bindings in a dedicated
+  frame.
+
+[[http://readme.emacsair.me/keycast.png]]
+
+#+html: <br><br>
+#+html: <a href="https://github.com/tarsius/keycast/actions/workflows/compile.yml"><img alt="Compile" src="https://github.com/tarsius/keycast/actions/workflows/compile.yml/badge.svg"/></a>
+#+html: <a href="https://elpa.nongnu.org/nongnu/keycast.html"><img alt="NonGNU ELPA" src="https://elpa.nongnu.org/nongnu/keycast.svg"/></a>
+#+html: <a href="https://stable.melpa.org/#/keycast"><img alt="MELPA Stable" src="https://stable.melpa.org/packages/keycast-badge.svg"/></a>
+#+html: <a href="https://melpa.org/#/keycast"><img alt="MELPA" src="https://melpa.org/packages/keycast-badge.svg"/></a>
