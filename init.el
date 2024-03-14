@@ -138,23 +138,7 @@
 (use-package lsp-ivy
 :defer 2
   :commands lsp-ivy-workspace-symbol)
-(use-package lsp-treemacs
-:defer 2
-  :commands lsp-treemacs-errors-list)
 
-;; optionally if you want to use debugger
-(use-package dap-mode
-  :defer 2
-:ensure t
-  )
-;; (use-package dap-LANGUAGE) to load the dap adapter for your language
-
-;; optional if you want which-key integration
-(use-package which-key
-  :defer t
-    :ensure t
-    :config
-    (which-key-mode))
 
 ;; optionally
 
@@ -200,8 +184,8 @@
 
 
 
-;; Make Org mode the default for .org files
-;; This line is usually the default in recent Emacs versions
+;;Make Org mode the default for .org files
+;;This line is usually the default in recent Emacs versions
 (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
 (use-package org-roam
   :defer t
@@ -459,7 +443,17 @@ into the main dumped emacs"
     (add-hook 'kill-emacs-hook
               (lambda ()
                 (when (get-process "Nyxt")
+                  (delete-process (get-process "Nyxt")))))))
+(defun markdown-export-to-html-and-open-in-nyxt ()
+ "Export the current Markdown file to HTML and open it in Nyxt."
+ (interactive)
+ (let ((html-file (markdown-export)))
+    (start-process "Nyxt" nil "nyxt" html-file)
+    (add-hook 'kill-emacs-hook
+              (lambda ()
+                (when (get-process "Nyxt")
                  (delete-process (get-process "Nyxt")))))))
+
 
 
 
@@ -472,6 +466,9 @@ into the main dumped emacs"
  (define-key org-mode-map (kbd "C-c C-o") org-export-to-html-and-open-in-nyxt-map))
 
 
+(add-hook 'markdown-mode-hook
+          (lambda ()
+            (local-set-key (kbd "C-c C-o") 'markdown-export-to-html-and-open-in-nyxt)))
 
 
 (custom-set-variables
