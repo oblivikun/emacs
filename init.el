@@ -47,8 +47,7 @@
  :config
  (progn
     ;; Your custom configurations here
-    (treemacs-follow-mode t)
-    (treemacs-filewatch-mode t)
+
     (treemacs-fringe-indicator-mode 'always)
     (when treemacs-python-executable
       (treemacs-git-commit-diff-mode t))
