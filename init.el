@@ -1,7 +1,7 @@
  ;;; package -- summary
 ;;; Commentary:
 ;;; Code:
-(setq gc-cons-threshold (* 64 1000 1000))
+
 
 (setq initial-major-mode 'fundamental-mode)
 (setq initial-scratch-message 'nil)
@@ -15,8 +15,7 @@
 
 (add-hook 'emacs-startup-hook
 	      (lambda ()
-	        (setq gc-cons-threshold 16777216) ; 16mb
-	        (setq gc-cons-percentage 0.2)
+	        (setq gc-cons-threshold (* 16 1024 1024))
 	        (require 'gcmh)
 		            (message "Emacs ready in %s with %d garbage collections."
                      (format "%.2f seconds"
@@ -40,13 +39,11 @@
  (package-initialize))
 (setenv "IN_EMACS" "1")
 (use-package keycast
-  :defer t
   :ensure t
   :config
   (keycast-tab-bar-mode))
 (use-package treemacs
  :ensure t
- :defer t
  :config
  (progn
     ;; Your custom configurations here
@@ -64,6 +61,7 @@
     (treemacs-hide-gitignored-files-mode nil)))
 
 
+
   
 (use-package dashboard
  :ensure t
@@ -79,7 +77,8 @@
 (setq dashboard-icon-type 'nerd-icons) ; use `nerd-icons' package
  ;; vertically center content
  ; use `nerd-icons' package
- (setq dashboard-filter-agenda-entry 'dashboard-no-filter-agenda)
+(setq dashboard-filter-agenda-entry 'dashboard-no-filter-agenda)
+(setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
  (setq dashboard-vertically-center-content t))
 (global-set-key (kbd "M-0") 'treemacs)
 
@@ -90,11 +89,11 @@
 (use-package spaceline
  :ensure t
  :config
- (spaceline-emacs-theme))
+ (spaceline-spacemacs-theme))
 
 (global-company-mode t)
 (use-package company
-    :defer 0.1
+    :defer t 
     :config
     (global-company-mode t)
     (setq-default
@@ -106,7 +105,7 @@
 ))
 
 (use-package lsp-mode
-  :defer t
+  :defer 2
   :init
   ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
   (setq lsp-keymap-prefix "C-c l")
@@ -131,27 +130,37 @@
   :commands lsp)
 
 ;; optionally
-(use-package lsp-ui :commands lsp-ui-mode)
+(use-package lsp-ui
+:defer 2
+  :commands lsp-ui-mode)
 
 ;; if you are ivy user
-(use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
-(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+(use-package lsp-ivy
+:defer 2
+  :commands lsp-ivy-workspace-symbol)
+(use-package lsp-treemacs
+:defer 2
+  :commands lsp-treemacs-errors-list)
 
 ;; optionally if you want to use debugger
 (use-package dap-mode
+  :defer 2
 :ensure t
   )
 ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
 
 ;; optional if you want which-key integration
 (use-package which-key
+  :defer t
     :ensure t
     :config
     (which-key-mode))
 
 ;; optionally
 
-(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+(use-package lsp-treemacs
+:defer 2
+  :commands lsp-treemacs-errors-list)
 ;; open terminal keybind(
 (defun open-terminal-at-bottom ()
  "Split the window and open a terminal in the new window, taking only a quarter of the screen."
@@ -179,6 +188,7 @@
 ;; Enable Org mode for .org files
 
 (use-package org
+  :defer t
  :ensure t
  :config
  (setq org-todo-keywords
@@ -188,10 +198,13 @@
          ("IN-PROGRESS" :foreground "yellow" :weight bold)
          ("DONE" :foreground "green" :weight bold))))
 
+
+
 ;; Make Org mode the default for .org files
 ;; This line is usually the default in recent Emacs versions
 (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
 (use-package org-roam
+  :defer t
   :ensure t
   :custom
   (org-roam-directory (file-truename "~/roam/"))
@@ -228,6 +241,7 @@ into the main dumped emacs"
 
 
 (defun dump-load-path ()
+  (interactive)
   (with-temp-buffer
     (insert (prin1-to-string `(setq load-path ',load-path)))
     (fill-region (point-min) (point-max))
@@ -236,7 +250,7 @@ into the main dumped emacs"
 (defun dump-emacs ()
   "Dump current Emacs config."
   (interactive)
-  (shell-command "emacs --batch -l ~/.emacs -eval '(dump-load-path)' -eval '(dump-emacs-portable \"~/emacs.dump\")'"))
+  (shell-command "emacs --batch -l ~/.edump -eval '(dump-load-path)' -eval '(dump-emacs-portable \"~/emacs.dump\")'"))
 
 ;; org keybinds
 (defun my-org-todo-toggle ()
@@ -269,6 +283,7 @@ into the main dumped emacs"
   (add-to-list 'completion-at-point-functions #'codeium-completion-at-point)
   )
 (use-package elcord
+ :defer t
  :ensure t
  :commands elcord-mode
  :config
@@ -289,10 +304,11 @@ into the main dumped emacs"
   (other-window 1)
   (org-agenda nil "t"))
 (global-set-key (kbd "C-c a") 'my-split-and-open-todo-list)
-
-;; spell checking
-(global-flycheck-mode)
-(flycheck-define-checker ascii-spell
+(use-package flycheck
+  :ensure t
+  :defer 2
+  :config
+  (flycheck-define-checker ascii-spell
   "A spell checker using Ispell or Aspell."
   :command ("aspell" "--list")
   :error-patterns
@@ -300,7 +316,10 @@ into the main dumped emacs"
           (file-name) ":" line-end
           "spell-error" (message) line-end))
   :modes (text-mode))
-(add-to-list 'flycheck-checkers 'ascii-spell)
+  (add-to-list 'flycheck-checkers 'ascii-spell)
+  (global-flycheck-mode)
+  )
+;; spell checking
 ;; Load AUCTeX
 (load "auctex.el" nil t t)
 
@@ -350,7 +369,9 @@ into the main dumped emacs"
 (setq alert-default-style 'libnotify)
 (setq rcirc-notify-message "message from %s")
 
-
+(use-package magit
+  :defer t
+  )
 (setq message-send-mail-function 'smtpmail-send-it)
 ;; Git
 (setq magit-define-global-key-bindings nil)
@@ -358,6 +379,7 @@ into the main dumped emacs"
 (tab-bar-mode)
 ;; Projectile
 (use-package projectile
+  :defer t
   :ensure t
   :config
   (projectile-mode +1)
@@ -376,7 +398,6 @@ into the main dumped emacs"
 (global-set-key (kbd "C-c C-r") 'ivy-resume)
 (global-set-key (kbd "<f6>") 'ivy-resume)
 (global-set-key (kbd "M-x") 'counsel-M-x)
-(global-set-key (kbd "C-x C-f") 'counsel-find-file)
 (global-set-key (kbd "<f1> f") 'counsel-describe-function)
 (global-set-key (kbd "<f1> v") 'counsel-describe-variable)
 (global-set-key (kbd "<f1> o") 'counsel-describe-symbol)
@@ -394,11 +415,7 @@ into the main dumped emacs"
 (global-set-key (kbd "C-c <right>") 'windmove-right)
 (global-set-key (kbd "C-c <up>")    'windmove-up)
 (global-set-key (kbd "C-c <down>")  'windmove-down)
-(use-package winum
- :ensure t
- :config
- (winum-set-keymap-prefix (kbd "C-c"))
- (winum-mode))
+
 
 (use-package treemacs-nerd-icons
   :config
@@ -432,11 +449,30 @@ into the main dumped emacs"
   :config
  (setq system-packages-use-sudo t)
  (setq system-packages-package-manager 'emerge))
-;; GURU MODE
-(use-package guru-mode
- :ensure t
- :config
- (guru-global-mode +1))
+
+;; For writing org files, change nyxt to browser of choice
+(defun org-export-to-html-and-open-in-nyxt ()
+ "Export the current Org file to HTML and open it in Nyxt."
+ (interactive)
+ (let ((html-file (org-html-export-to-html)))
+    (start-process "Nyxt" nil "nyxt" html-file)
+    (add-hook 'kill-emacs-hook
+              (lambda ()
+                (when (get-process "Nyxt")
+                 (delete-process (get-process "Nyxt")))))))
+
+
+
+(defvar org-export-to-html-and-open-in-nyxt-map (make-sparse-keymap)
+ "Keymap for `org-export-to-html-and-open-in-nyxt'.")
+
+(define-key org-export-to-html-and-open-in-nyxt-map (kbd "h o") 'org-export-to-html-and-open-in-nyxt)
+
+(with-eval-after-load "org"
+ (define-key org-mode-map (kbd "C-c C-o") org-export-to-html-and-open-in-nyxt-map))
+
+
+
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -447,7 +483,7 @@ into the main dumped emacs"
  '(custom-safe-themes
    '("3e374bb5eb46eb59dbd92578cae54b16de138bc2e8a31a2451bf6fdb0f3fd81b" "72ed8b6bffe0bfa8d097810649fd57d2b598deef47c992920aef8b5d9599eefe" "d80952c58cf1b06d936b1392c38230b74ae1a2a6729594770762dc0779ac66b7" "2ff9ac386eac4dffd77a33e93b0c8236bb376c5a5df62e36d4bfa821d56e4e20" default))
  '(package-selected-packages
-   '(all-the-icons-gnus spaceline-all-the-icons octicons all-the-icons-ivy all-the-icons-nerd-fonts org-roam-ui nerd-icons-dired nerd-icons-completion nerd-icons-ivy-rich gruvbox-dark-medium gruvbox-themes gcmh snapshot-timemachine project-treemacs treemacs-projectile treemacs-nerd-icons company-jedi counsel bongo exwm system-packages restart-emacs org-download undo-tree haskell-snippets ivy projectile magit rcirc-notify elcord auctex flycheck org-agenda-files-track-ql org-agenda-property org-agenda-files-track org-contrib dashboard aggressive-indent spaceline powerline lsp-haskell lsp-latex lsp-ui gruvbox-theme company))
+   '(grip-mode org-preview-html which-key keycast treemacs-tab-bar bbdb- counsel-bbdb all-the-icons-gnus spaceline-all-the-icons octicons all-the-icons-ivy all-the-icons-nerd-fonts org-roam-ui nerd-icons-dired nerd-icons-completion nerd-icons-ivy-rich gruvbox-dark-medium gruvbox-themes gcmh snapshot-timemachine project-treemacs treemacs-projectile treemacs-nerd-icons company-jedi counsel bongo exwm system-packages restart-emacs org-download undo-tree haskell-snippets ivy projectile magit rcirc-notify elcord auctex flycheck org-agenda-files-track-ql org-agenda-property org-agenda-files-track org-contrib dashboard aggressive-indent spaceline powerline lsp-haskell lsp-latex lsp-ui gruvbox-theme company))
  '(send-mail-function 'mailclient-send-it))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -455,3 +491,4 @@ into the main dumped emacs"
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+(put 'narrow-to-region 'disabled nil)

@@ -5,9 +5,9 @@
 ;;(setq byte-compile-warnings '(not free-vars unresolved noruntime lexical make-local))
 
 ;; use proper .cache folder for eln-cache
-;; (setq package-user-dir (string-replace ".config" ".cache" package-user-dir))
-;; (setcar native-comp-eln-load-path
-;;         (string-replace ".config" ".cache" (car native-comp-eln-load-path)))
+ (setq package-user-dir (string-replace ".config" ".cache" package-user-dir))
+ (setcar native-comp-eln-load-path
+         (string-replace ".config" ".cache" (car native-comp-eln-load-path)))
 
 ;; The traditional dance of calming down the garbage collector during init,
 ;; as that improves startup times. Taken from Doom Emacs [1].
@@ -16,27 +16,16 @@
 
 ;; Wait till init to start emacs packages
 ;; (setq package-enable-at-startup nil)
+(setq gc-cons-threshold most-positive-fixnum)
 
-(defvar me/gc-cons-threshold 80000000000)
-(setq gc-cons-threshold most-positive-fixnum
-      gc-cons-percentage 0.875)
-(add-hook 'emacs-startup-hook
-          (lambda ()
-            (setq gc-cons-threshold me/gc-cons-threshold
-                  gc-cons-percentage 0.1)))
 
 ;; max memory available for gc when opening minibuffer
 (defun me/defer-garbage-collection-h ()
   (setq gc-cons-threshold most-positive-fixnum))
 
-(defun me/restore-garbage-collection-h ()
-  ;; Defer it so that commands launched immediately after will enjoy the
-  ;; benefits.
-  (run-at-time
-   1 nil (lambda () (setq gc-cons-threshold me/gc-cons-threshold))))
 
 (add-hook 'minibuffer-setup-hook #'me/defer-garbage-collection-h)
-(add-hook 'minibuffer-exit-hook #'me/restore-garbage-collection-h)
+
 
 (defvar me/-file-name-handler-alist file-name-handler-alist)
 (setq file-name-handler-alist nil)
