@@ -15,7 +15,7 @@
 
 (add-hook 'emacs-startup-hook
 	      (lambda ()
-	        (setq gc-cons-threshold (* 16 1024 1024))
+	        (setq gc-cons-threshold  most-positive-fixnum)
 	        (require 'gcmh)
 		            (message "Emacs ready in %s with %d garbage collections."
                      (format "%.2f seconds"
@@ -83,7 +83,10 @@
 (global-set-key (kbd "M-0") 'treemacs)
 
 
-
+(use-package hydra
+  :defer t
+  :ensure t
+  )
 ;;powerline
 
 (use-package spaceline
@@ -357,6 +360,104 @@ into the main dumped emacs"
   :defer t
   )
 (setq message-send-mail-function 'smtpmail-send-it)
+;; GNUS
+;; @see https://github.com/redguardtoo/mastering-emacs-in-one-year-guide/blob/master/gnus-guide-en.org
+;; gnus-group-mode
+(use-package dianyou
+  :defer t
+  :ensure t
+  )
+(eval-after-load 'gnus-group
+  '(progn
+     (defhydra hydra-gnus-group (:color blue)
+       "
+[_A_] Remote groups (A A) [_g_] Refresh
+[_L_] Local groups        [_\\^_] List servers
+[_c_] Mark all read       [_m_] Compose new mail
+[_G_] Search mails (G G) [_#_] Mark mail
+"
+       ("A" gnus-group-list-active)
+       ("L" gnus-group-list-all-groups)
+       ("c" gnus-topic-catchup-articles)
+       ("G" dianyou-group-make-nnir-group)
+       ("g" gnus-group-get-new-news)
+       ("^" gnus-group-enter-server-mode)
+       ("m" gnus-group-new-mail)
+       ("#" gnus-topic-mark-topic)
+       ("q" nil))
+     ;; y is not used by default
+     (define-key gnus-group-mode-map "y" 'hydra-gnus-group/body)))
+
+;; gnus-summary-mode
+(eval-after-load 'gnus-sum
+  '(progn
+     (defhydra hydra-gnus-summary (:color blue)
+       "
+[_s_] Show thread   [_F_] Forward (C-c C-f)
+[_h_] Hide thread   [_e_] Resend (S D e)
+[_n_] Refresh (/ N) [_r_] Reply
+[_!_] Mail -> disk  [_R_] Reply with original
+[_d_] Disk -> mail  [_w_] Reply all (S w)
+[_c_] Read all      [_W_] Reply all with original (S W)
+[_#_] Mark          [_G_] Search mails
+"
+       ("s" gnus-summary-show-thread)
+       ("h" gnus-summary-hide-thread)
+       ("n" gnus-summary-insert-new-articles)
+       ("F" gnus-summary-mail-forward)
+       ("!" gnus-summary-tick-article-forward)
+       ("d" gnus-summary-put-mark-as-read-next)
+       ("c" gnus-summary-catchup-and-exit)
+       ("e" gnus-summary-resend-message-edit)
+       ("R" gnus-summary-reply-with-original)
+       ("r" gnus-summary-reply)
+       ("W" gnus-summary-wide-reply-with-original)
+       ("w" gnus-summary-wide-reply)
+       ("#" gnus-topic-mark-topic)
+       ("G" dianyou-group-make-nnir-group)
+       ("q" nil))
+     ;; y is not used by default
+     (define-key gnus-summary-mode-map "y" 'hydra-gnus-summary/body)))
+
+;; gnus-article-mode
+(eval-after-load 'gnus-art
+  '(progn
+     (defhydra hydra-gnus-article (:color blue)
+       "
+[_o_] Save attachment        [_F_] Forward
+[_v_] Play video/audio       [_r_] Reply
+[_d_] CLI to download stream [_R_] Reply with original
+[_b_] Open external browser  [_w_] Reply all (S w)
+[_f_] Click link/button      [_W_] Reply all with original (S W)
+[_g_] Focus link/button
+"
+       ("F" gnus-summary-mail-forward)
+       ("r" gnus-article-reply)
+       ("R" gnus-article-reply-with-original)
+       ("w" gnus-article-wide-reply)
+       ("W" gnus-article-wide-reply-with-original)
+       ("q" nil))
+     ;; y is not used by default
+     (define-key gnus-article-mode-map "y" 'hydra-gnus-article/body)))
+
+;; message-mode
+(eval-after-load 'message
+  '(progn
+     (defhydra hydra-message (:color blue)
+  "
+[_c_] Complete mail address
+[_a_] Attach file
+[_s_] Send mail (C-c C-c)
+"
+       ("c" counsel-bbdb-complete-mail)
+       ("a" mml-attach-file)
+       ("s" message-send-and-exit)
+       ("i" dianyou-insert-email-address-from-received-mails)
+       ("q" nil))))
+
+(defun message-mode-hook-hydra-setup ()
+  (local-set-key (kbd "C-c C-y") 'hydra-message/body))
+(add-hook 'message-mode-hook 'message-mode-hook-hydra-setup)
 ;; Git
 (setq magit-define-global-key-bindings nil)
 ;; tab bar
@@ -485,7 +586,7 @@ into the main dumped emacs"
  '(custom-safe-themes
    '("3e374bb5eb46eb59dbd92578cae54b16de138bc2e8a31a2451bf6fdb0f3fd81b" "72ed8b6bffe0bfa8d097810649fd57d2b598deef47c992920aef8b5d9599eefe" "d80952c58cf1b06d936b1392c38230b74ae1a2a6729594770762dc0779ac66b7" "2ff9ac386eac4dffd77a33e93b0c8236bb376c5a5df62e36d4bfa821d56e4e20" default))
  '(package-selected-packages
-   '(indent-guide grip-mode org-preview-html which-key keycast treemacs-tab-bar bbdb- counsel-bbdb all-the-icons-gnus spaceline-all-the-icons octicons all-the-icons-ivy all-the-icons-nerd-fonts org-roam-ui nerd-icons-dired nerd-icons-completion nerd-icons-ivy-rich gruvbox-dark-medium gruvbox-themes gcmh snapshot-timemachine project-treemacs treemacs-projectile treemacs-nerd-icons company-jedi counsel bongo exwm system-packages restart-emacs org-download undo-tree haskell-snippets ivy projectile magit rcirc-notify elcord auctex flycheck org-agenda-files-track-ql org-agenda-property org-agenda-files-track org-contrib dashboard aggressive-indent spaceline powerline lsp-haskell lsp-latex lsp-ui gruvbox-theme company))
+   '(ivy-hydra use-package-hydra indent-guide grip-mode org-preview-html which-key keycast treemacs-tab-bar bbdb- counsel-bbdb all-the-icons-gnus spaceline-all-the-icons octicons all-the-icons-ivy all-the-icons-nerd-fonts org-roam-ui nerd-icons-dired nerd-icons-completion nerd-icons-ivy-rich gruvbox-dark-medium gruvbox-themes gcmh snapshot-timemachine project-treemacs treemacs-projectile treemacs-nerd-icons company-jedi counsel bongo exwm system-packages restart-emacs org-download undo-tree haskell-snippets ivy projectile magit rcirc-notify elcord auctex flycheck org-agenda-files-track-ql org-agenda-property org-agenda-files-track org-contrib dashboard aggressive-indent spaceline powerline lsp-haskell lsp-latex lsp-ui gruvbox-theme company))
  '(send-mail-function 'mailclient-send-it))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
