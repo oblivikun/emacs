@@ -1,0 +1,1 @@
+("~/.emacs.d/" "~/" "~/.config/nyxt/" "~/.emacs.d/codeium.el/")
