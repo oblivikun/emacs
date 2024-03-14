@@ -18,6 +18,7 @@
 ;; (setq package-enable-at-startup nil)
 (setq gc-cons-threshold most-positive-fixnum)
 
+;;(setq package-enable-at-startup nil)
 
 ;; max memory available for gc when opening minibuffer
 (defun me/defer-garbage-collection-h ()
@@ -49,6 +50,7 @@
 
 (setq frame-inhibit-implied-resize t)
 (setq inhibit-compacting-font-caches t)
+
 
 ;; Font settings
 ;; default to utf-8 for all the things

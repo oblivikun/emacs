@@ -12,7 +12,12 @@
  (setq gc-cons-threshold most-positive-fixnum)
 (setq custom-safe-themes t)
 (use-package gcmh :defer t)
-
+(require 'package
+ (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+;; Comment/uncomment this line to enable MELPA Stable if desired.  See `package-archive-priorities`
+;; and `package-pinned-packages`. Most users will not need or want to do this.
+ ;;(add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t
+ )
 (add-hook 'emacs-startup-hook
 	      (lambda ()
 	        (setq gc-cons-threshold  most-positive-fixnum)
@@ -31,12 +36,7 @@
 (global-display-line-numbers-mode t)
 (add-hook 'treemacs-mode-hook (lambda() (display-line-numbers-mode -1)))
 
-(require 'package
- (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-;; Comment/uncomment this line to enable MELPA Stable if desired.  See `package-archive-priorities`
-;; and `package-pinned-packages`. Most users will not need or want to do this.
-;;(add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
- (package-initialize))
+
 (setenv "IN_EMACS" "1")
 (use-package keycast
   :ensure t
@@ -145,9 +145,7 @@
 
 ;; optionally
 
-(use-package lsp-treemacs
-:defer 2
-  :commands lsp-treemacs-errors-list)
+
 ;; open terminal keybind(
 (defun open-terminal-at-bottom ()
  "Split the window and open a terminal in the new window, taking only a quarter of the screen."
@@ -363,6 +361,40 @@ into the main dumped emacs"
 ;; GNUS
 ;; @see https://github.com/redguardtoo/mastering-emacs-in-one-year-guide/blob/master/gnus-guide-en.org
 ;; gnus-group-mode
+(use-package org-mime
+ :ensure t
+ :config
+ (require 'org-mime)
+ ;; Set the mail library based on your mail client
+ ;; For Gnus, this is set by default
+ (setq org-mime-library 'mml)
+ ;; For Wanderlust (WL), use 'semi
+ ;; (setq org-mime-library 'semi)
+ ;; For VM, use 'vm (not yet supported)
+ ;; (setq org-mime-library 'vm)
+ )
+(defun my-insert-html-signature ()
+ (let ((signature "<div style=\"display: block; white-space: nowrap; border: 1px solid #000; text-decoration: underline;\">
+    Best regards, Your Name Your Position Your Company
+ </div>"))
+    (goto-char (point-max))
+    (insert signature)))
+
+
+ (add-hook 'org-mime-html-hook 'my-insert-html-signature)
+(add-hook 'message-mode-hook
+          (lambda ()
+            (local-set-key (kbd "C-c M-o") 'org-mime-htmlize)))
+(add-hook 'org-mime-html-hook
+          (lambda ()
+            (org-mime-change-element-style
+             "pre" (format "color: %s; background-color: %s; padding: 0.5em;"
+                           "#E6E1DC" "#232323"))))
+
+(add-hook 'org-mime-html-hook
+          (lambda ()
+            (org-mime-change-element-style
+             "blockquote" "border-left: 2px solid gray; padding-left: 4px;")))
 (use-package dianyou
   :defer t
   :ensure t
@@ -586,7 +618,7 @@ into the main dumped emacs"
  '(custom-safe-themes
    '("3e374bb5eb46eb59dbd92578cae54b16de138bc2e8a31a2451bf6fdb0f3fd81b" "72ed8b6bffe0bfa8d097810649fd57d2b598deef47c992920aef8b5d9599eefe" "d80952c58cf1b06d936b1392c38230b74ae1a2a6729594770762dc0779ac66b7" "2ff9ac386eac4dffd77a33e93b0c8236bb376c5a5df62e36d4bfa821d56e4e20" default))
  '(package-selected-packages
-   '(ivy-hydra use-package-hydra indent-guide grip-mode org-preview-html which-key keycast treemacs-tab-bar bbdb- counsel-bbdb all-the-icons-gnus spaceline-all-the-icons octicons all-the-icons-ivy all-the-icons-nerd-fonts org-roam-ui nerd-icons-dired nerd-icons-completion nerd-icons-ivy-rich gruvbox-dark-medium gruvbox-themes gcmh snapshot-timemachine project-treemacs treemacs-projectile treemacs-nerd-icons company-jedi counsel bongo exwm system-packages restart-emacs org-download undo-tree haskell-snippets ivy projectile magit rcirc-notify elcord auctex flycheck org-agenda-files-track-ql org-agenda-property org-agenda-files-track org-contrib dashboard aggressive-indent spaceline powerline lsp-haskell lsp-latex lsp-ui gruvbox-theme company))
+   '(gmail2bbdb ivy-hydra use-package-hydra indent-guide grip-mode org-preview-html which-key keycast treemacs-tab-bar bbdb- counsel-bbdb all-the-icons-gnus spaceline-all-the-icons octicons all-the-icons-ivy all-the-icons-nerd-fonts org-roam-ui nerd-icons-dired nerd-icons-completion nerd-icons-ivy-rich gruvbox-dark-medium gruvbox-themes gcmh snapshot-timemachine project-treemacs treemacs-projectile treemacs-nerd-icons company-jedi counsel exwm system-packages restart-emacs org-download undo-tree haskell-snippets ivy projectile magit rcirc-notify elcord auctex flycheck org-agenda-files-track-ql org-agenda-property org-agenda-files-track org-contrib dashboard aggressive-indent spaceline powerline lsp-haskell lsp-latex lsp-ui gruvbox-theme company))
  '(send-mail-function 'mailclient-send-it))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
