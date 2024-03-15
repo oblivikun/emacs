@@ -153,8 +153,7 @@
  (let ((height (window-body-height)))
    (split-window-below (- height (/ height 4)))) ; height of top window is 1/2 of the frame height
  (other-window 1)
- (term "/bin/ksh"))
-(global-set-key (kbd "C-c t") 'open-terminal-at-bottom)
+ (term "ksh"))
 ;; close terminal at bottom
 (defun close-terminal-at-bottom ()
  "Close the terminal window at the bottom or the current window if it's a terminal."
@@ -168,7 +167,23 @@
                  (eq 'term-mode (buffer-local-value 'major-mode (window-buffer (next-window)))))
         (delete-window (next-window))))))
 
-(global-set-key (kbd "C-c q") 'close-terminal-at-bottom)
+(defun open-python-shell-at-bottom ()
+ "Split the window and open a Python shell in the new window, taking only a quarter of the screen."
+ (interactive)
+ (let ((height (window-body-height)))
+    (split-window-below (- height (/ height 4)))) ; height of top window is 1/2 of the frame height
+ (other-window 1)
+ (run-python))
+
+(defhydra hydra-terminal-python-manager (:color blue)
+ "Terminal/Python"
+ ("t" open-terminal-at-bottom "Open Terminal")
+ ("q" close-terminal-at-bottom "Close Terminal")
+ ("p" open-python-shell-at-bottom "Open Python Shell")
+ ("q" nil "quit"))
+
+(global-set-key (kbd "C-c t") 'hydra-terminal-python-manager/body)
+
 
 ;; Enable Org mode for .org files
 
