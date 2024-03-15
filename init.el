@@ -587,6 +587,7 @@ into the main dumped emacs"
  ("o" (org-export-to-html-and-open-in-nyxt) "Open in Nyxt")
  ("l" (org-latex-export-to-latex) "Export to LaTeX")
  ("b" (org-beamer-export-to-latex) "Export to Beamer")
+ ("d" (org-export-to-docx-and-open) "Export to DOCX")
  ("q" nil "quit"))
 (define-key org-mode-map (kbd "C-c C-e") 'hydra-org-export-and-view/body)
 
@@ -599,6 +600,15 @@ into the main dumped emacs"
               (lambda ()
                 (when (get-process "Nyxt")
                  (delete-process (get-process "Nyxt")))))))
+;; Pandoc
+(defun org-export-to-docx-and-open ()
+ "Export the current Org file to DOCX and open it in Emacs."
+ (interactive)
+ (let ((docx-file (concat (file-name-base (buffer-file-name)) ".docx")))
+    (shell-command (format "pandoc %s -o %s" (buffer-file-name) docx-file))
+    ;; Open the DOCX file in Emacs using DocView mode
+    (find-file docx-file)))
+
 
 ;; For writing org files, change nyxt to browser of choice
 (defun org-export-to-html-and-open-in-nyxt ()
