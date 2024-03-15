@@ -152,8 +152,7 @@
  (let ((height (window-body-height)))
    (split-window-below (- height (/ height 4)))) ; height of top window is 1/2 of the frame height
  (other-window 1)
- (term "/bin/ksh"))
-(global-set-key (kbd "C-c t") 'open-terminal-at-bottom)
+ (term "ksh"))
 ;; close terminal at bottom
 (defun close-terminal-at-bottom ()
  "Close the terminal window at the bottom or the current window if it's a terminal."
@@ -167,7 +166,23 @@
                  (eq 'term-mode (buffer-local-value 'major-mode (window-buffer (next-window)))))
         (delete-window (next-window))))))
 
-(global-set-key (kbd "C-c q") 'close-terminal-at-bottom)
+(defun open-python-shell-at-bottom ()
+ "Split the window and open a Python shell in the new window, taking only a quarter of the screen."
+ (interactive)
+ (let ((height (window-body-height)))
+    (split-window-below (- height (/ height 4)))) ; height of top window is 1/2 of the frame height
+ (other-window 1)
+ (term "python3"))
+
+(defhydra hydra-terminal-python-manager (:color blue)
+ "Terminal/Python"
+ ("t" open-terminal-at-bottom "Open Terminal")
+ ("q" close-terminal-at-bottom "Close Terminal")
+ ("p" open-python-shell-at-bottom "Open Python Shell")
+ ("q" nil "quit"))
+
+(global-set-key (kbd "C-c t") 'hydra-terminal-python-manager/body)
+
 
 ;; Enable Org mode for .org files
 
@@ -544,16 +559,6 @@ into the main dumped emacs"
     (shell-command "discordo" nil discord-buffer)
     (display-buffer discord-buffer nil)))
 
-(use-package exwm
-  :defer t
- :if (and (display-graphic-p)
-           (executable-find "wmctrl")
-           (not (get-buffer "*window-manager*")))
- :config
- (shell-command "wmctrl -m ; echo $?" "*window-manager*" "*window-manager-error*")
- (when (and (get-buffer "*window-manager-error*")
-             (eq window-system 'x))
-    (exwm-config-example)))
 
 
 (global-set-key (kbd "C-x C-k") 'kill-current-buffer)
@@ -572,6 +577,7 @@ into the main dumped emacs"
  ("o" (org-export-to-html-and-open-in-nyxt) "Open in Nyxt")
  ("l" (org-latex-export-to-latex) "Export to LaTeX")
  ("b" (org-beamer-export-to-latex) "Export to Beamer")
+ ("d" (org-export-to-docx-and-open) "Export to DOCX")
  ("q" nil "quit"))
 (define-key org-mode-map (kbd "C-c C-e") 'hydra-org-export-and-view/body)
 
@@ -584,6 +590,15 @@ into the main dumped emacs"
               (lambda ()
                 (when (get-process "Nyxt")
                  (delete-process (get-process "Nyxt")))))))
+;; Pandoc
+(defun org-export-to-docx-and-open ()
+ "Export the current Org file to DOCX and open it in Emacs."
+ (interactive)
+ (let ((docx-file (concat (file-name-base (buffer-file-name)) ".docx")))
+    (shell-command (format "pandoc %s -o %s" (buffer-file-name) docx-file))
+    ;; Open the DOCX file in Emacs using DocView mode
+    (find-file docx-file)))
+
 
 ;; For writing org files, change nyxt to browser of choice
 (defun org-export-to-html-and-open-in-nyxt ()
