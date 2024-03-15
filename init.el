@@ -172,7 +172,7 @@
  (let ((height (window-body-height)))
     (split-window-below (- height (/ height 4)))) ; height of top window is 1/2 of the frame height
  (other-window 1)
- (run-python))
+ (term "python3"))
 
 (defhydra hydra-terminal-python-manager (:color blue)
  "Terminal/Python"
@@ -559,16 +559,6 @@ into the main dumped emacs"
     (shell-command "discordo" nil discord-buffer)
     (display-buffer discord-buffer nil)))
 
-(use-package exwm
-  :defer t
- :if (and (display-graphic-p)
-           (executable-find "wmctrl")
-           (not (get-buffer "*window-manager*")))
- :config
- (shell-command "wmctrl -m ; echo $?" "*window-manager*" "*window-manager-error*")
- (when (and (get-buffer "*window-manager-error*")
-             (eq window-system 'x))
-    (exwm-config-example)))
 
 
 (global-set-key (kbd "C-x C-k") 'kill-current-buffer)
