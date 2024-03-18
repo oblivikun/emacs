@@ -47,8 +47,7 @@
  :config
  (progn
     ;; Your custom configurations here
-    (treemacs-follow-mode t)
-    (treemacs-filewatch-mode t)
+
     (treemacs-fringe-indicator-mode 'always)
     (when treemacs-python-executable
       (treemacs-git-commit-diff-mode t))
@@ -153,8 +152,7 @@
  (let ((height (window-body-height)))
    (split-window-below (- height (/ height 4)))) ; height of top window is 1/2 of the frame height
  (other-window 1)
- (term "/bin/ksh"))
-(global-set-key (kbd "C-c t") 'open-terminal-at-bottom)
+ (term "ksh"))
 ;; close terminal at bottom
 (defun close-terminal-at-bottom ()
  "Close the terminal window at the bottom or the current window if it's a terminal."
@@ -168,7 +166,23 @@
                  (eq 'term-mode (buffer-local-value 'major-mode (window-buffer (next-window)))))
         (delete-window (next-window))))))
 
-(global-set-key (kbd "C-c q") 'close-terminal-at-bottom)
+(defun open-python-shell-at-bottom ()
+ "Split the window and open a Python shell in the new window, taking only a quarter of the screen."
+ (interactive)
+ (let ((height (window-body-height)))
+    (split-window-below (- height (/ height 4)))) ; height of top window is 1/2 of the frame height
+ (other-window 1)
+ (term "python3"))
+
+(defhydra hydra-terminal-python-manager (:color blue)
+ "Terminal/Python"
+ ("t" open-terminal-at-bottom "Open Terminal")
+ ("q" close-terminal-at-bottom "Close Terminal")
+ ("p" open-python-shell-at-bottom "Open Python Shell")
+ ("q" nil "quit"))
+
+(global-set-key (kbd "C-c t") 'hydra-terminal-python-manager/body)
+
 
 ;; Enable Org mode for .org files
 
@@ -262,11 +276,7 @@ into the main dumped emacs"
 
 
 
-(add-to-list 'load-path "/home/erel/.emacs.d/codeium.el")
-(use-package codeium
-  :init
-  (add-to-list 'completion-at-point-functions #'codeium-completion-at-point)
-  )
+
 (use-package elcord
  :defer t
  :ensure t
@@ -411,7 +421,7 @@ into the main dumped emacs"
        ("A" gnus-group-list-active)
        ("L" gnus-group-list-all-groups)
        ("c" gnus-topic-catchup-articles)
-       ("G" dianyou-group-make-nnir-group)
+       ("G" dianyou-group-make-nnir-groupx)
        ("g" gnus-group-get-new-news)
        ("^" gnus-group-enter-server-mode)
        ("m" gnus-group-new-mail)
@@ -486,7 +496,6 @@ into the main dumped emacs"
        ("s" message-send-and-exit)
        ("i" dianyou-insert-email-address-from-received-mails)
        ("q" nil))))
-
 (defun message-mode-hook-hydra-setup ()
   (local-set-key (kbd "C-c C-y") 'hydra-message/body))
 (add-hook 'message-mode-hook 'message-mode-hook-hydra-setup)
@@ -545,16 +554,6 @@ into the main dumped emacs"
     (shell-command "discordo" nil discord-buffer)
     (display-buffer discord-buffer nil)))
 
-(use-package exwm
-  :defer t
- :if (and (display-graphic-p)
-           (executable-find "wmctrl")
-           (not (get-buffer "*window-manager*")))
- :config
- (shell-command "wmctrl -m ; echo $?" "*window-manager*" "*window-manager-error*")
- (when (and (get-buffer "*window-manager-error*")
-             (eq window-system 'x))
-    (exwm-config-example)))
 
 
 (global-set-key (kbd "C-x C-k") 'kill-current-buffer)
@@ -566,12 +565,16 @@ into the main dumped emacs"
   :config
  (setq system-packages-use-sudo t)
  (setq system-packages-package-manager 'emerge))
+;; more hydra stuff for org
 (defhydra hydra-org-export-and-view ()
  "Export and view"
  ("h" (org-html-export-to-html) "Export to HTML")
  ("o" (org-export-to-html-and-open-in-nyxt) "Open in Nyxt")
+ ("l" (org-latex-export-to-latex) "Export to LaTeX")
+ ("b" (org-beamer-export-to-latex) "Export to Beamer")
+ ("d" (org-export-to-docx-and-open) "Export to DOCX")
  ("q" nil "quit"))
-(define-key org-mode-map (kbd "C-c e") 'hydra-org-export-and-view/body)
+(define-key org-mode-map (kbd "C-c C-e") 'hydra-org-export-and-view/body)
 
 (defun org-export-to-html-and-open-in-nyxt ()
  "Export the current Org file to HTML and open it in Nyxt."
@@ -582,6 +585,15 @@ into the main dumped emacs"
               (lambda ()
                 (when (get-process "Nyxt")
                  (delete-process (get-process "Nyxt")))))))
+;; Pandoc
+(defun org-export-to-docx-and-open ()
+ "Export the current Org file to DOCX and open it in Emacs."
+ (interactive)
+ (let ((docx-file (concat (file-name-base (buffer-file-name)) ".docx")))
+    (shell-command (format "pandoc %s -o %s" (buffer-file-name) docx-file))
+    ;; Open the DOCX file in Emacs using DocView mode
+    (find-file docx-file)))
+
 
 ;; For writing org files, change nyxt to browser of choice
 (defun org-export-to-html-and-open-in-nyxt ()
@@ -634,7 +646,7 @@ into the main dumped emacs"
  '(custom-safe-themes
    '("98ef36d4487bf5e816f89b1b1240d45755ec382c7029302f36ca6626faf44bbd" "3e374bb5eb46eb59dbd92578cae54b16de138bc2e8a31a2451bf6fdb0f3fd81b" "72ed8b6bffe0bfa8d097810649fd57d2b598deef47c992920aef8b5d9599eefe" "d80952c58cf1b06d936b1392c38230b74ae1a2a6729594770762dc0779ac66b7" "2ff9ac386eac4dffd77a33e93b0c8236bb376c5a5df62e36d4bfa821d56e4e20" default))
  '(package-selected-packages
-   '(gmail2bbdb ivy-hydra use-package-hydra indent-guide grip-mode org-preview-html which-key keycast treemacs-tab-bar bbdb- counsel-bbdb all-the-icons-gnus spaceline-all-the-icons octicons all-the-icons-ivy all-the-icons-nerd-fonts org-roam-ui nerd-icons-dired nerd-icons-completion nerd-icons-ivy-rich gruvbox-dark-medium gruvbox-themes gcmh snapshot-timemachine project-treemacs treemacs-projectile treemacs-nerd-icons company-jedi counsel exwm system-packages restart-emacs org-download undo-tree haskell-snippets ivy projectile magit rcirc-notify elcord auctex flycheck org-agenda-files-track-ql org-agenda-property org-agenda-files-track org-contrib dashboard aggressive-indent spaceline powerline lsp-haskell lsp-latex lsp-ui gruvbox-theme company))
+   '(gnus-desktop-notify dianyou gmail2bbdb ivy-hydra use-package-hydra indent-guide grip-mode org-preview-html which-key keycast treemacs-tab-bar bbdb- counsel-bbdb all-the-icons-gnus spaceline-all-the-icons octicons all-the-icons-ivy all-the-icons-nerd-fonts org-roam-ui nerd-icons-dired nerd-icons-completion nerd-icons-ivy-rich gruvbox-dark-medium gruvbox-themes gcmh snapshot-timemachine project-treemacs treemacs-projectile treemacs-nerd-icons company-jedi counsel system-packages restart-emacs org-download undo-tree haskell-snippets ivy projectile magit rcirc-notify elcord auctex flycheck org-agenda-files-track-ql org-agenda-property org-agenda-files-track org-contrib dashboard aggressive-indent spaceline powerline lsp-haskell lsp-latex lsp-ui gruvbox-theme company))
  '(send-mail-function 'mailclient-send-it))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

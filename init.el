@@ -11,7 +11,7 @@
 (setq jit-lock-stealth-load 200)
  (setq gc-cons-threshold most-positive-fixnum)
 (setq custom-safe-themes t)
-(use-package gcmh :defer t)
+(use-package gcmh )
 (require 'package
  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 ;; Comment/uncomment this line to enable MELPA Stable if desired.  See `package-archive-priorities`
@@ -20,15 +20,14 @@
  )
 (add-hook 'emacs-startup-hook
 	      (lambda ()
-	        (setq gc-cons-threshold  most-positive-fixnum)
-	        (require 'gcmh)
+	       	        (require 'gcmh)
 		            (message "Emacs ready in %s with %d garbage collections."
                      (format "%.2f seconds"
                              (float-time
                              (time-subtract after-init-time before-init-time)))
                      gcs-done)
 		;; (load-theme 'gruvbox-dark-medium) i now embrace light theme
-		(load-theme 'gruvbox-light-medium)
+		(load-theme 'gruvbox-light-medium t)
 	        (gcmh-mode 1)))
 
 (setq inhibit-startup-message t)
@@ -178,8 +177,7 @@
  "Terminal/Python"
  ("t" open-terminal-at-bottom "Open Terminal")
  ("q" close-terminal-at-bottom "Close Terminal")
- ("p" open-python-shell-at-bottom "Open Python Shell")
- ("q" nil "quit"))
+ ("p" open-python-shell-at-bottom "Open Python Shell"))
 
 (global-set-key (kbd "C-c t") 'hydra-terminal-python-manager/body)
 
@@ -238,6 +236,22 @@ into the main dumped emacs"
  (dolist (file (get-loads-from-*Messages*))
     (princ (format "(load \"%s\")\n" file))))
 
+(let ((backup-dir "~/.emacs.d/backups")
+      (auto-saves-dir "~/.emacs.d/autosaves"))
+  (dolist (dir (list backup-dir auto-saves-dir))
+    (when (not (file-directory-p dir))
+      (make-directory dir t)))
+  (setq backup-directory-alist `(("." . ,backup-dir))
+        auto-save-file-name-transforms `((".*" ,auto-saves-dir t))
+        auto-save-list-file-prefix (concat auto-saves-dir ".saves-")
+        tramp-backup-directory-alist `((".*" . ,backup-dir))
+        tramp-auto-save-directory auto-saves-dir))
+
+(setq backup-by-copying t    ; Don't delink hardlinks
+      delete-old-versions t  ; Clean up the backups
+      version-control t      ; Use version numbers on backups,
+      kept-new-versions 5    ; keep some new versions
+      kept-old-versions 2)   ; and some old ones, too
 
 (defun dump-load-path ()
   (interactive)
@@ -276,11 +290,7 @@ into the main dumped emacs"
 
 
 
-(add-to-list 'load-path "/home/erel/.emacs.d/codeium.el")
-(use-package codeium
-  :init
-  (add-to-list 'completion-at-point-functions #'codeium-completion-at-point)
-  )
+
 (use-package elcord
  :defer t
  :ensure t
@@ -425,7 +435,7 @@ into the main dumped emacs"
        ("A" gnus-group-list-active)
        ("L" gnus-group-list-all-groups)
        ("c" gnus-topic-catchup-articles)
-       ("G" dianyou-group-make-nnir-group)
+       ("G" dianyou-group-make-nnir-groupx)
        ("g" gnus-group-get-new-news)
        ("^" gnus-group-enter-server-mode)
        ("m" gnus-group-new-mail)
@@ -500,7 +510,6 @@ into the main dumped emacs"
        ("s" message-send-and-exit)
        ("i" dianyou-insert-email-address-from-received-mails)
        ("q" nil))))
-
 (defun message-mode-hook-hydra-setup ()
   (local-set-key (kbd "C-c C-y") 'hydra-message/body))
 (add-hook 'message-mode-hook 'message-mode-hook-hydra-setup)
@@ -651,7 +660,7 @@ into the main dumped emacs"
  '(custom-safe-themes
    '("98ef36d4487bf5e816f89b1b1240d45755ec382c7029302f36ca6626faf44bbd" "3e374bb5eb46eb59dbd92578cae54b16de138bc2e8a31a2451bf6fdb0f3fd81b" "72ed8b6bffe0bfa8d097810649fd57d2b598deef47c992920aef8b5d9599eefe" "d80952c58cf1b06d936b1392c38230b74ae1a2a6729594770762dc0779ac66b7" "2ff9ac386eac4dffd77a33e93b0c8236bb376c5a5df62e36d4bfa821d56e4e20" default))
  '(package-selected-packages
-   '(dianyou gmail2bbdb ivy-hydra use-package-hydra indent-guide grip-mode org-preview-html which-key keycast treemacs-tab-bar bbdb- counsel-bbdb all-the-icons-gnus spaceline-all-the-icons octicons all-the-icons-ivy all-the-icons-nerd-fonts org-roam-ui nerd-icons-dired nerd-icons-completion nerd-icons-ivy-rich gruvbox-dark-medium gruvbox-themes gcmh snapshot-timemachine project-treemacs treemacs-projectile treemacs-nerd-icons company-jedi counsel exwm system-packages restart-emacs org-download undo-tree haskell-snippets ivy projectile magit rcirc-notify elcord auctex flycheck org-agenda-files-track-ql org-agenda-property org-agenda-files-track org-contrib dashboard aggressive-indent spaceline powerline lsp-haskell lsp-latex lsp-ui gruvbox-theme company))
+   '(common-lisp-snippets zenity-color-picker gnus-x-gm-raw counsel-mairix gnus-desktop-notify dianyou gmail2bbdb ivy-hydra use-package-hydra indent-guide org-preview-html which-key keycast treemacs-tab-bar bbdb- counsel-bbdb all-the-icons-gnus spaceline-all-the-icons octicons all-the-icons-ivy all-the-icons-nerd-fonts org-roam-ui nerd-icons-dired nerd-icons-completion nerd-icons-ivy-rich gruvbox-dark-medium gruvbox-themes gcmh snapshot-timemachine project-treemacs treemacs-projectile treemacs-nerd-icons company-jedi counsel system-packages restart-emacs org-download undo-tree haskell-snippets ivy projectile magit rcirc-notify elcord auctex flycheck org-agenda-files-track-ql org-agenda-property org-agenda-files-track org-contrib dashboard aggressive-indent spaceline powerline lsp-haskell lsp-ui gruvbox-theme company))
  '(send-mail-function 'mailclient-send-it))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
