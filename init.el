@@ -29,7 +29,7 @@
                              (time-subtract after-init-time before-init-time)))
                      gcs-done)
 		;; (load-theme 'gruvbox-dark-medium) i now embrace light theme
-		(load-theme 'gruvbox-light-medium t)
+		;; (load-theme 'gruvbox-light-medium t)
 	        (gcmh-mode 1)))
 
 (setq inhibit-startup-message t)
