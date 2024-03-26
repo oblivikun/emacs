@@ -61,7 +61,14 @@
     (treemacs-hide-gitignored-files-mode nil)))
 
 
-
+(setq browse-url-browser-function 'eww-browse-url
+      shr-use-colors nil
+      shr-bullet "• "
+      shr-folding-mode t
+      eww-search-prefix "https://html.duckduckgo.com/html?q="
+      url-privacy-level '(email agent cookies lastloc)
+      browse-url-secondary-browser-function 'browse-url-firefox)
+(setq browse-url-browser-function 'eww-browse-url)
   
 (use-package dashboard
  :ensure t
@@ -92,7 +99,7 @@
    '("98ef36d4487bf5e816f89b1b1240d45755ec382c7029302f36ca6626faf44bbd" "3e374bb5eb46eb59dbd92578cae54b16de138bc2e8a31a2451bf6fdb0f3fd81b" "72ed8b6bffe0bfa8d097810649fd57d2b598deef47c992920aef8b5d9599eefe" "d80952c58cf1b06d936b1392c38230b74ae1a2a6729594770762dc0779ac66b7" "2ff9ac386eac4dffd77a33e93b0c8236bb376c5a5df62e36d4bfa821d56e4e20" default))
  '(haskell-stylish-on-save t)
  '(package-selected-packages
-   '(guru-mode winum common-lisp-snippets zenity-color-picker gnus-x-gm-raw counsel-mairix gnus-desktop-notify dianyou gmail2bbdb ivy-hydra use-package-hydra indent-guide org-preview-html which-key keycast treemacs-tab-bar bbdb- counsel-bbdb all-the-icons-gnus spaceline-all-the-icons octicons all-the-icons-ivy all-the-icons-nerd-fonts org-roam-ui nerd-icons-dired nerd-icons-completion nerd-icons-ivy-rich gruvbox-dark-medium gruvbox-themes gcmh snapshot-timemachine project-treemacs treemacs-projectile treemacs-nerd-icons company-jedi counsel system-packages restart-emacs org-download undo-tree haskell-snippets ivy projectile magit rcirc-notify elcord auctex flycheck org-agenda-files-track-ql org-agenda-property org-agenda-files-track org-contrib dashboard aggressive-indent spaceline powerline lsp-haskell lsp-ui gruvbox-theme company))
+   '(common-lisp-snippets zenity-color-picker gnus-x-gm-raw counsel-mairix gnus-desktop-notify dianyou gmail2bbdb ivy-hydra use-package-hydra indent-guide org-preview-html which-key keycast treemacs-tab-bar bbdb- counsel-bbdb all-the-icons-gnus spaceline-all-the-icons octicons all-the-icons-ivy all-the-icons-nerd-fonts org-roam-ui nerd-icons-dired nerd-icons-completion nerd-icons-ivy-rich gruvbox-dark-medium gruvbox-themes gcmh snapshot-timemachine project-treemacs treemacs-projectile treemacs-nerd-icons company-jedi counsel system-packages restart-emacs org-download undo-tree haskell-snippets ivy projectile magit rcirc-notify elcord auctex org-agenda-files-track-ql org-agenda-property org-agenda-files-track org-contrib dashboard aggressive-indent spaceline powerline lsp-haskell lsp-ui gruvbox-theme company))
  '(send-mail-function 'mailclient-send-it))
 
 (use-package hydra
@@ -327,21 +334,7 @@ into the main dumped emacs"
   (other-window 1)
   (org-agenda nil "t"))
 (global-set-key (kbd "C-c a") 'my-split-and-open-todo-list)
-(use-package flycheck
-  :ensure t
-  :defer 2
-  :config
-  (flycheck-define-checker ascii-spell
-  "A spell checker using Ispell or Aspell."
-  :command ("aspell" "--list")
-  :error-patterns
-  ((error line-start
-          (file-name) ":" line-end
-          "spell-error" (message) line-end))
-  :modes (text-mode))
-  (add-to-list 'flycheck-checkers 'ascii-spell)
-  (global-flycheck-mode)
-  )
+
 ;; spell checking
 ;; Load AUCTeX
 (load "auctex.el" nil t t)
