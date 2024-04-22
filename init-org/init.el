@@ -18,7 +18,7 @@
     :custom
     
 (setq straight-check-for-modifications 'live-with-find)
-
+    (setq display-line-numbers-type 'relative)
     (straight-use-package-by-default t))
       (add-hook 'prog-mode-hook 'display-line-numbers-mode)
       (add-hook 'text-mode-hook 'display-line-numbers-mode)
@@ -636,8 +636,10 @@ Defaults to Sly because it has better integration with Nyxt."
   (shell-command "emacs --batch -l ~/.edump -eval '(dump-load-path)' -eval '(dump-emacs-portable \"~/emacs.dump\")'"))
 
 (use-package undo-tree
+   :demand t
 :config
-(global-undo-tree-mode))
+(global-undo-tree-mode)
+)
 
 (use-package elcord
  :defer 20
@@ -934,3 +936,8 @@ Defaults to Sly because it has better integration with Nyxt."
 (use-package go-mode
   :after (lsp-mode lsp-ui ivy counsel company))
 (display-time-mode)
+(use-package lsp-haskell
+  :after (lsp-mode lsp-ui haskell-mode ivy counsel company))
+(use-package haskell-mode
+   :defer 20
+  :after (lsp-mode lsp-ui ivy counsel company))

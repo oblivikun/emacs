@@ -1,4 +1,3 @@
-
 *** My Emacs Configuration
 A fast and sane emacs configuration with the stuff that i use configured, these stuff are:
 - Gnus for newsreading
@@ -40,7 +39,7 @@ This turns on gcmh, tells us our startup time and turns on ivy - moved to early-
       :custom
       
   (setq straight-check-for-modifications 'live-with-find)
-
+      (setq display-line-numbers-type 'relative)
       (straight-use-package-by-default t))
         (add-hook 'prog-mode-hook 'display-line-numbers-mode)
         (add-hook 'text-mode-hook 'display-line-numbers-mode)
@@ -812,9 +811,11 @@ Keymap for org-export-to-html-and-open-in-nyxt
   #+END_SRC
   Undo tree
   #+BEGIN_SRC emacs-lisp
-  (use-package undo-tree
- :config
- (global-undo-tree-mode))
+         (use-package undo-tree
+           :demand t
+        :config
+        (global-undo-tree-mode)
+        )
 #+END_SRC
 Elcord - unnecessecary package i use to flex my emacs.
 #+BEGIN_SRC emacs-lisp
@@ -1188,4 +1189,9 @@ auto-compile
   (use-package go-mode
     :after (lsp-mode lsp-ui ivy counsel company))
   (display-time-mode)
+  (use-package lsp-haskell
+    :after (lsp-mode lsp-ui haskell-mode ivy counsel company))
+  (use-package haskell-mode
+     :defer 20
+    :after (lsp-mode lsp-ui ivy counsel company))
 #+END_SRC
