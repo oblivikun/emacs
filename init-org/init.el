@@ -64,7 +64,7 @@
    ;; Set the title
    (setq dashboard-banner-logo-title "Oblivikun Emacs")
    ;; Set the banner
-   (setq dashboard-startup-banner (expand-file-name "branding/logo.png" user-emacs-directory))
+   (setq dashboard-startup-banner 'official)
 
    (setq dashboard-center-content t)
   (setq dashboard-display-icons-p t)     ; display icons on both GUI and terminal

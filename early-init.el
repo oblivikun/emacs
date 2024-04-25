@@ -6,7 +6,7 @@
 (setq use-package-always-defer t)
 
 (setq load-prefer-newer noninteractive)
-(setq gc-cons-threshold #x60000000)
+(setq gc-cons-threshold #x80000000)
 
 (setq package-enable-at-startup nil)
   (setq auto-mode-case-fold nil)
@@ -47,8 +47,6 @@
     ;;                inhibit-message t)
         (put 'site-run-file 'initial-value site-run-file)
       (setq site-run-file nil)
-(setq gc-cons-threshold most-positive-fixnum)
-(setq gc-cons-percentage 0.7)
 ;;(setq byte-compile-warnings '(not free-vars unresolved noruntime lexical make-local))
 
 ;; use proper .cache folder for eln-cache
