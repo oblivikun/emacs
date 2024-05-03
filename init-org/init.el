@@ -18,10 +18,9 @@
     :custom
     
 (setq straight-check-for-modifications 'live-with-find)
-    (setq display-line-numbers-type 'relative)
+
     (straight-use-package-by-default t))
       (add-hook 'prog-mode-hook 'display-line-numbers-mode)
-      (add-hook 'text-mode-hook 'display-line-numbers-mode)
 
 (setenv "IN_EMACS" "1")
 
@@ -31,7 +30,6 @@
 
 (use-package treemacs
   :after (dashboard ivy)
- :commands (treemacs)
  :config
  (progn
     (add-hook 'treemacs-mode-hook (lambda() (display-line-numbers-mode -1)))
@@ -82,7 +80,8 @@
   )
 
 (use-package doom-modeline
-  :hook (after-init . doom-modeline-mode))
+ :ensure t
+ :hook (after-init . doom-modeline-mode))
 
 (use-package company
  :defer t
@@ -735,7 +734,7 @@ Defaults to Sly because it has better integration with Nyxt."
 
 (use-package dianyou
   :after (org gnus)
-  :defer t
+  :defer tpetersen_mickey_mastering_emacs.pdf
   )
 
 (eval-after-load 'gnus-group
@@ -824,7 +823,7 @@ Defaults to Sly because it has better integration with Nyxt."
   (local-set-key (kbd "C-c C-y") 'hydra-message/body))
 (add-hook 'message-mode-hook 'message-mode-hook-hydra-setup)
 
-(tab-bar-mode)
+
 
 (use-package projectile
   :after (treemacs ivy counsel)
@@ -884,11 +883,11 @@ Defaults to Sly because it has better integration with Nyxt."
 
 (global-set-key (kbd "C-x C-k") 'kill-current-buffer)
 
-(use-package system-packages
-  :defer 20
-  :config
- (setq system-packages-use-sudo t)
- (setq system-packages-package-manager 'emerge))
+;; (use-package system-packages
+;;   :defer 20
+;;   :config
+;;  (setq system-packages-use-sudo t)
+;;  (setq system-packages-package-manager 'emerge))
 
 (add-hook 'markdown-mode-hook
           (lambda ()
@@ -906,22 +905,25 @@ Defaults to Sly because it has better integration with Nyxt."
 (setq TeX-show-compilation nil)
 
 (use-package doom-themes
-    :defer 10
-    )
-
-;; Function to switch to gruvbox-dark-medium at 8 PM and default theme at 9 AM
+  :defer 10
+  )
 (defun switch-theme-based-on-time ()
   (interactive)
- (let ((current-hour (string-to-number (format-time-string "%H"))))
+  (let ((current-hour (string-to-number (format-time-string "%H"))))
     (cond ((and (>= current-hour 20) (<= current-hour 23))
-	   (disable-theme t)
-           (load-theme 'doom-sourcerer t))
+           (disable-theme t)
+           (load-theme 'doom-solarized-dark-high-contrast t))
           ((and (>= current-hour 9) (<= current-hour 19))
-	   (disable-theme t)
-           (load-theme 'doom-nord-light t)))))
+           (disable-theme t)
+           (load-theme 'doom-solarized-light t))
+          ;; Removed the condition for 8 AM to 9 AM
+          (t ;; This is the else clause
+           (disable-theme t)
+           (load-theme 'doom-solarized-dark-high-contrast t)))) ;; Load the default theme if none of the conditions are met
+  )
 
-;; Schedule the theme switch function to run every hour
-(run-at-time "00:00" (* 60 60) 'switch-theme-based-on-time)
+    ;; Schedule the theme switch function to run every hour
+    (run-at-time "00:00" (* 60 60) 'switch-theme-based-on-time)
 
 (use-package guru-mode
 :defer nil

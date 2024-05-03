@@ -10,7 +10,7 @@ A fast and sane emacs configuration with the stuff that i use configured, these 
 [[../img/a.png]] [[../img/b.png]]
 * Garbage collection and performance tweaks
 Here we use gcmh for better garbage collection, make the initial-major-mode fundemental mode
-and do more performance tweaks.
+and do more performance tweaks. - moved to early-init.el
 #+BEGIN_SRC emacs-lisp
 
 
@@ -39,10 +39,9 @@ This turns on gcmh, tells us our startup time and turns on ivy - moved to early-
       :custom
       
   (setq straight-check-for-modifications 'live-with-find)
-      (setq display-line-numbers-type 'relative)
+
       (straight-use-package-by-default t))
         (add-hook 'prog-mode-hook 'display-line-numbers-mode)
-        (add-hook 'text-mode-hook 'display-line-numbers-mode)
 #+END_SRC
 
   This is for my shell config so it doesnt open GNU screen when im in emacs terminal.
@@ -67,7 +66,6 @@ Unnessecary now, i know what im doing
 #+BEGIN_SRC emacs-lisp
   (use-package treemacs
     :after (dashboard ivy)
-   :commands (treemacs)
    :config
    (progn
       (add-hook 'treemacs-mode-hook (lambda() (display-line-numbers-mode -1)))
@@ -128,9 +126,10 @@ Hydra So i can remember my keybinds
     :defer t
     )
  #+END_SRC
-doom (I reallly like the bar in doom and the normal bar looks weird)
+modeline
 #+BEGIN_SRC emacs-lisp
-(use-package doom-modeline
+ (use-package doom-modeline
+  :ensure t
   :hook (after-init . doom-modeline-mode))
 #+END_SRC
 Company for auto completions. I really like this package :)
@@ -897,8 +896,9 @@ see https://github.com/redguardtoo/mastering-emacs-in-one-year-guide/blob/master
   (use-package gnus
     :defer t
     )
-  
+
     (setq message-send-mail-function 'smtpmail-send-it)
+
 #+END_SRC
 This is for encrypted authinfo
 #+BEGIN_SRC emacs-lisp
@@ -943,7 +943,7 @@ more org-mime stuff
  #+BEGIN_SRC emacs-lisp
    (use-package dianyou
      :after (org gnus)
-     :defer t
+     :defer tpetersen_mickey_mastering_emacs.pdf
      )
 #+END_SRC
 The epic hydra from the guide, VERY usefull :D
@@ -1045,7 +1045,6 @@ Another hydra for message-mode
 * The end of the gnus stuff
 Some tab bar stuff because i also love this
 #+BEGIN_SRC emacs-lisp
-(tab-bar-mode)
 #+END_SRC
 * Projectile because i absoloutely love this :D
 #+BEGIN_SRC emacs-lisp
@@ -1124,11 +1123,11 @@ Usefull keybind
 #+END_SRC
 system-packages, usefull package so i can watch my libraries compile(i use gentoo btw)
 #+BEGIN_SRC emacs-lisp
-(use-package system-packages
-  :defer 20
-  :config
- (setq system-packages-use-sudo t)
- (setq system-packages-package-manager 'emerge))
+  ;; (use-package system-packages
+  ;;   :defer 20
+  ;;   :config
+  ;;  (setq system-packages-use-sudo t)
+  ;;  (setq system-packages-package-manager 'emerge))
 #+END_SRC
 Indent-guide
 #+BEGIN_SRC emacs-lisp
@@ -1154,23 +1153,26 @@ Indent-guide
     #+END_SRC
 Switch themes at certain times
 #+BEGIN_SRC emacs-lisp
-    (use-package doom-themes
-      :defer 10
-      )
-
-  ;; Function to switch to gruvbox-dark-medium at 8 PM and default theme at 9 AM
+  (use-package doom-themes
+    :defer 10
+    )
   (defun switch-theme-based-on-time ()
     (interactive)
-   (let ((current-hour (string-to-number (format-time-string "%H"))))
+    (let ((current-hour (string-to-number (format-time-string "%H"))))
       (cond ((and (>= current-hour 20) (<= current-hour 23))
-  	   (disable-theme t)
-             (load-theme 'doom-sourcerer t))
+             (disable-theme t)
+             (load-theme 'doom-solarized-dark-high-contrast t))
             ((and (>= current-hour 9) (<= current-hour 19))
-  	   (disable-theme t)
-             (load-theme 'doom-nord-light t)))))
+             (disable-theme t)
+             (load-theme 'doom-solarized-light t))
+            ;; Removed the condition for 8 AM to 9 AM
+            (t ;; This is the else clause
+             (disable-theme t)
+             (load-theme 'doom-solarized-dark-high-contrast t)))) ;; Load the default theme if none of the conditions are met
+    )
 
-  ;; Schedule the theme switch function to run every hour
-  (run-at-time "00:00" (* 60 60) 'switch-theme-based-on-time)
+      ;; Schedule the theme switch function to run every hour
+      (run-at-time "00:00" (* 60 60) 'switch-theme-based-on-time)
 #+END_SRC
 Guru mode because i have bad habits
 #+BEGIN_SRC emacs-lisp
