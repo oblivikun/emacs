@@ -1,4 +1,20 @@
-
+(put 'mode-line-format 'initial-value (default-toplevel-value 'mode-line-format))
+(setq-default mode-line-format nil)
+(dolist (buf (buffer-list))
+  (with-current-buffer buf (setq mode-line-format nil)))
+;; PERF,UX: Premature redisplays/redraws can substantially affect startup
+;;   times and/or flash a white/unstyled Emacs frame during startup, so I
+;;   try real hard to suppress them until we're sure the session is ready.
+(setq-default inhibit-redisplay t
+              inhibit-message t)
+;; COMPAT: If the above vars aren't reset, Emacs could appear frozen or
+;;   garbled after startup (or in case of an startup error).
+(defun doom--reset-inhibited-vars-h ()
+  (setq-default inhibit-redisplay nil
+                ;; Inhibiting `message' only prevents redraws and
+                inhibit-message nil)
+  (redraw-frame))
+(add-hook 'after-init-hook #'doom--reset-inhibited-vars-h)
 
 
 
@@ -79,9 +95,9 @@
   :defer t
   )
 
-(use-package doom-modeline
- :ensure t
- :hook (after-init . doom-modeline-mode))
+(use-package spaceline
+ :defer 10
+  :hook (after-init . spaceline-spacemacs-theme))
 
 (use-package company
  :defer t
@@ -648,7 +664,8 @@ Defaults to Sly because it has better integration with Nyxt."
  )
 
 (use-package auctex
-:defer 20
+  
+:defer t
 
 :config
 (setq TeX-show-compilation nil)

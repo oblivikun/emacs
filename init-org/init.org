@@ -12,6 +12,23 @@ A fast and sane emacs configuration with the stuff that i use configured, these 
 Here we use gcmh for better garbage collection, make the initial-major-mode fundemental mode
 and do more performance tweaks. - moved to early-init.el
 #+BEGIN_SRC emacs-lisp
+    (put 'mode-line-format 'initial-value (default-toplevel-value 'mode-line-format))
+    (setq-default mode-line-format nil)
+    (dolist (buf (buffer-list))
+      (with-current-buffer buf (setq mode-line-format nil)))
+    ;; PERF,UX: Premature redisplays/redraws can substantially affect startup
+    ;;   times and/or flash a white/unstyled Emacs frame during startup, so I
+    ;;   try real hard to suppress them until we're sure the session is ready.
+    (setq-default inhibit-redisplay t
+                  inhibit-message t)
+    ;; COMPAT: If the above vars aren't reset, Emacs could appear frozen or
+    ;;   garbled after startup (or in case of an startup error).
+    (defun doom--reset-inhibited-vars-h ()
+      (setq-default inhibit-redisplay nil
+                    ;; Inhibiting `message' only prevents redraws and
+                    inhibit-message nil)
+      (redraw-frame))
+    (add-hook 'after-init-hook #'doom--reset-inhibited-vars-h)
 
 
 
@@ -128,9 +145,10 @@ Hydra So i can remember my keybinds
  #+END_SRC
 modeline
 #+BEGIN_SRC emacs-lisp
- (use-package doom-modeline
-  :ensure t
-  :hook (after-init . doom-modeline-mode))
+
+(use-package spaceline
+ :defer 10
+  :hook (after-init . spaceline-spacemacs-theme))
 #+END_SRC
 Company for auto completions. I really like this package :)
 #+BEGIN_SRC emacs-lisp
@@ -830,7 +848,8 @@ Elcord - unnecessecary package i use to flex my emacs.
 load auctex
 #+BEGIN_SRC emacs-lisp
     (use-package auctex
-    :defer 20
+    
+  :defer t
   #+END_SRC
 Disable display of compilation log and add makeglossaries to the tex command for easy managament of glossaries
 #+BEGIN_SRC emacs-lisp
