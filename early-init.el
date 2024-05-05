@@ -5,13 +5,12 @@
   (setq custom-safe-themes t)
 
 (setq load-prefer-newer noninteractive)
-(setq gc-cons-threshold #x120000000)
+(setq gc-cons-threshold #x140000000)
 (setq use-package-always-defer t)
 (setq package-enable-at-startup nil)
   (setq auto-mode-case-fold nil)
   (setq-default bidi-display-reordering 'left-to-right
               bidi-paragraph-direction 'left-to-right)
-(setq frame-inhibit-implied-resize t)
 ;; (when (featurep 'native-compile)
 ;;   ;; Set the right directory to store the native compilation cache
 ;;   (let ((path (expand-file-name "eln-cache/" user-emacs-directory)))
@@ -78,7 +77,7 @@
 
 (push '(tool-bar-lines . 0)   default-frame-alist)
 (push '(vertical-scroll-bars) default-frame-alist)
-(setq menu-bar-mode t
+(setq menu-bar-mode nil
       tool-bar-mode nil
       scroll-bar-mode nil)
 
@@ -98,15 +97,7 @@
 
 
 ;; ;; Set default font
-  (add-hook 'emacs-startup-hook
-  	     
-  		(lambda ()
-  		       (add-to-list 'load-path "gcmh")
-  		       (use-package gcmh
-			 :defer 2.3
-  			:config
-  		  (gcmh-mode 1))
-  		  )
+
   ;;		            (message "Emacs ready in %s with %d garbage collections."
     ;;                   (format "%.2f seconds"
   	 ;;                      (float-time
@@ -114,6 +105,6 @@
   		  ;;     gcs-done)
   		  ;; (load-theme 'gruvbox-dark-medium) i now embrace light theme
   		  ;; (load-theme 'gruvbox-light-medium t)
-  )
+ 
 ;; Choose a fallback with size comparible to Terminus so that we don't break
 ;; vterm.

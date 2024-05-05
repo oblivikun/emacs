@@ -1,8 +1,9 @@
-(put 'mode-line-format 'initial-value (default-toplevel-value 'mode-line-format))
-(setq-default mode-line-format nil)
-(dolist (buf (buffer-list))
-  (with-current-buffer buf (setq mode-line-format nil)))
-;; PERF,UX: Premature redisplays/redraws can substantially affect startup
+;; (put 'mode-line-format 'initial-value (default-toplevel-value 'mode-line-format))
+;; (setq-default mode-line-format nil)
+;; (dolist (buf (buffer-list))
+;;   (with-current-buffer buf (setq mode-line-format nil)))
+;; ;; PERF,UX: P
+;;remature redisplays/redraws can substantially affect startup
 ;;   times and/or flash a white/unstyled Emacs frame during startup, so I
 ;;   try real hard to suppress them until we're sure the session is ready.
 (setq-default inhibit-redisplay t
@@ -25,7 +26,7 @@
   		       (time-subtract after-init-time before-init-time)))
   	       gcs-done))
 (defun gc-restore ()
-  (setq gc-cons-threshold 1200000))
+  (setq gc-cons-threshold 12000000))
      (add-hook 'emacs-startup-hook #'gc-restore)
     (add-hook 'emacs-startup-hook #'efs/display-startup-time)
     (straight-use-package 'use-package)
@@ -40,9 +41,14 @@
 
 (setenv "IN_EMACS" "1")
 
-;; (use-package keycast
-;;   :config
-;;   (keycast-tab-bar-mode))
+(use-package dirvish
+   :commands (dirvish) ;; Specify the command to load Dirvish
+   :config
+ (dirvish-override-dired-mode)
+ :bind
+ 
+:bind (("C-x d" . dirvish-dispatch))
+   )
 
 (use-package treemacs
   :after (dashboard ivy)
@@ -95,9 +101,47 @@
   :defer t
   )
 
-(use-package spaceline
- :defer 10
-  :hook (after-init . spaceline-spacemacs-theme))
+(setq mode-line-end-spaces
+        '(""
+          display-time-string
+          battery-mode-line-string
+	  "GNU Emacs 29.3"
+	      ))
+    (defun my-mode-line/padding ()
+    (let ((r-length (length (format-mode-line mode-line-end-spaces))))
+      (propertize " "
+        'display `(space :align-to (- right ,r-length)))))
+(setq-default mode-line-format
+  '("%e"
+     " %o "
+     "%* "
+     my-modeline-buffer-name
+     my-modeline-major-mode
+           (:eval (my-mode-line/padding))
+      mode-line-end-spaces))
+  
+  
+
+(defvar-local my-modeline-buffer-name
+  '(:eval
+     (when (mode-line-window-selected-p)
+       (propertize (format " %s " (buffer-name))
+         'face '(t :background "#3355bb" :foreground "white" :inherit bold))))
+  "Mode line construct to display the buffer name.")
+
+(put 'my-modeline-buffer-name 'risky-local-variable t)
+
+(defvar-local my-modeline-major-mode
+  '(:eval
+     (list
+       (propertize "λ" 'face 'shadow)
+       " "
+       (propertize (capitalize (symbol-name major-mode)) 'face 'bold)))
+  "Mode line construct to display the major mode.")
+
+(put 'my-modeline-major-mode 'risky-local-variable t)
+  (setq-default header-line-format mode-line-format)
+      (setq-default mode-line-format nil)
 
 (use-package company
  :defer t
@@ -921,7 +965,7 @@ Defaults to Sly because it has better integration with Nyxt."
 
 (setq TeX-show-compilation nil)
 
-(use-package doom-themes
+(use-package solarized-theme
   :defer 10
   )
 (defun switch-theme-based-on-time ()
@@ -929,18 +973,21 @@ Defaults to Sly because it has better integration with Nyxt."
   (let ((current-hour (string-to-number (format-time-string "%H"))))
     (cond ((and (>= current-hour 20) (<= current-hour 23))
            (disable-theme t)
-           (load-theme 'doom-solarized-dark-high-contrast t))
+	   (message "switch")
+           (load-theme 'solarized-selenized-dark  ))
           ((and (>= current-hour 9) (<= current-hour 19))
-           (disable-theme t)
-           (load-theme 'doom-solarized-light t))
+	   (disable-theme t)
+	   (message "switch")
+           (load-theme 'solarized-selenized-light ))
           ;; Removed the condition for 8 AM to 9 AM
           (t ;; This is the else clause
            (disable-theme t)
-           (load-theme 'doom-solarized-dark-high-contrast t)))) ;; Load the default theme if none of the conditions are met
+	   (message "switch")
+           (load-theme 'solarized-selenized-black )))) ;; Load the default theme if none of the conditions are met
   )
 
     ;; Schedule the theme switch function to run every hour
-    (run-at-time "00:00" (* 60 60) 'switch-theme-based-on-time)
+    (run-at-time "00:00" (* 10 60) 'switch-theme-based-on-time)
 
 (use-package guru-mode
 :defer nil
@@ -954,9 +1001,9 @@ Defaults to Sly because it has better integration with Nyxt."
   :hook (company-mode . company-quickhelp-mode))
 (use-package go-mode
   :after (lsp-mode lsp-ui ivy counsel company))
-(display-time-mode)
 (use-package lsp-haskell
   :after (lsp-mode lsp-ui haskell-mode ivy counsel company))
 (use-package haskell-mode
    :defer 20
   :after (lsp-mode lsp-ui ivy counsel company))
+(display-time-mode 1)
