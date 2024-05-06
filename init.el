@@ -15,8 +15,9 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 (use-package org
-  :defer 3
+  :defer 4
   :straight t)
+
 (add-hook 'emacs-startup-hook
   	     
   		(lambda ()
@@ -44,4 +45,4 @@
 
 (org-babel-load-file
  (expand-file-name "init.org"
-                   "~/.emacs.d/init-org"))
+                   "~/exwm/init-org"))

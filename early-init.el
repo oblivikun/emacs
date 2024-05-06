@@ -5,7 +5,7 @@
   (setq custom-safe-themes t)
 
 (setq load-prefer-newer noninteractive)
-(setq gc-cons-threshold #x140000000)
+(setq gc-cons-threshold #x160000000)
 (setq use-package-always-defer t)
 (setq package-enable-at-startup nil)
   (setq auto-mode-case-fold nil)

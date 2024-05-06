@@ -29,9 +29,9 @@
   (setq gc-cons-threshold 12000000))
      (add-hook 'emacs-startup-hook #'gc-restore)
     (add-hook 'emacs-startup-hook #'efs/display-startup-time)
-    (straight-use-package 'use-package)
       (setq inhibit-startup-message t)
   (use-package straight
+    :commands (straight-use-package)
     :custom
     
 (setq straight-check-for-modifications 'live-with-find)
@@ -51,7 +51,7 @@
    )
 
 (use-package treemacs
-  :after (dashboard ivy)
+  :commands (treemacs)
  :config
  (progn
     (add-hook 'treemacs-mode-hook (lambda() (display-line-numbers-mode -1)))
@@ -97,8 +97,7 @@
  (setq dashboard-vertically-center-content t))
 
 (use-package hydra
-  :after (ivy dashboard)
-  :defer t
+  :defer 10
   )
 
 (setq mode-line-end-spaces
@@ -140,8 +139,7 @@
   "Mode line construct to display the major mode.")
 
 (put 'my-modeline-major-mode 'risky-local-variable t)
-  (setq-default header-line-format mode-line-format)
-      (setq-default mode-line-format nil)
+(display-time-mode)
 
 (use-package company
  :defer t
@@ -154,8 +152,8 @@
     company-frontends '(company-pseudo-tooltip-frontend company-preview-frontend)))
 
 (use-package slime
-  :after (lsp-mode ivy counsel)
- :defer t
+  :commands (slime slime-connect)
+ :defer 10
  :hook (lisp-mode . slime-mode))
 
 (defcustom cl-ide 'slime
@@ -476,8 +474,6 @@ Defaults to Sly because it has better integration with Nyxt."
 (provide 'emacs-with-nyxt)
 
 (use-package lsp-mode
-  :after (ivy counsel)
-  :defer t
   :init
   (setq lsp-keymap-prefix "C-c l")
   :hook (
@@ -502,14 +498,12 @@ Defaults to Sly because it has better integration with Nyxt."
   :commands lsp)
 
 (use-package lsp-ui
-  :after (lsp-mode)
- :defer t
+ :defer 12
  :hook (lsp-mode . lsp-ui-mode))
 
 ;; if you are ivy user
 (use-package lsp-ivy
-  :after (lsp-mode)
-  :defer t
+  :defer 12
   :commands lsp-ivy-workspace-symbol)
 
 ;; (add-hook 'prog-mode-hook #'eglot-ensure)
@@ -554,7 +548,6 @@ Defaults to Sly because it has better integration with Nyxt."
 
 (use-package org-roam
   :defer 10
- :after (org)
  :init
  (setq org-roam-directory (file-truename "~/roam/"))
  :custom
@@ -572,14 +565,17 @@ Defaults to Sly because it has better integration with Nyxt."
  )
 
 (setq org-hide-emphasis-markers t)
-  (font-lock-add-keywords 'org-mode
-                        '(("^ *\\([-]\\) "
-                           (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
-  (use-package org-bullets
-    :defer nil
-    :config
-  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
-  (add-hook 'org-mode-hook 'visual-line-mode)
+    (font-lock-add-keywords 'org-mode
+                          '(("^ *\\([-]\\) "
+                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+(use-package org-bullets
+ :ensure t
+ :hook (org-mode . (lambda ()
+                      (org-bullets-mode 1)
+                      (visual-line-mode)))
+ :config
+ ;; Additional configuration can go here
+ )
 
 (defun my-org-todo-toggle ()
   (interactive)
@@ -695,8 +691,7 @@ Defaults to Sly because it has better integration with Nyxt."
   (shell-command "emacs --batch -l ~/.edump -eval '(dump-load-path)' -eval '(dump-emacs-portable \"~/emacs.dump\")'"))
 
 (use-package undo-tree
-   :demand t
-:config
+:init
 (global-undo-tree-mode)
 )
 
@@ -751,13 +746,12 @@ Defaults to Sly because it has better integration with Nyxt."
 (setq rcirc-notify-message "message from %s")
 
 (use-package magit
-  :defer t
-  :after (treemacs ivy)
+  :commands (magit-clone magit magit-push magit-commit magit-stage-modified magit-stage-file)
   )
 
 (setq nnmail-treat-duplicates t)
 (use-package gnus
-  :defer t
+  :commands (gnus)
   )
 
   (setq message-send-mail-function 'smtpmail-send-it)
@@ -766,9 +760,8 @@ Defaults to Sly because it has better integration with Nyxt."
 ;; (epa-file-enable)
 
 (use-package org-mime
-   :after (org gnus)
- :defer t
- :config
+   :commands (org-mime-htmlize)
+   :config
 (setq org-mime-library 'mml))
 
 (defun my-insert-html-signature ()
@@ -783,7 +776,7 @@ Defaults to Sly because it has better integration with Nyxt."
           (lambda ()
             (local-set-key (kbd "C-c M-o") 'org-mime-htmlize)))
 (add-hook 'org-mime-html-hook
-          (lambda ()
+2          (lambda ()
             (org-mime-change-element-style
              "pre" (format "color: %s; background-color: %s; padding: 0.5em;"
                            "#E6E1DC" "#232323"))))
@@ -794,8 +787,7 @@ Defaults to Sly because it has better integration with Nyxt."
              "blockquote" "border-left: 2px solid gray; padding-left: 4px;")))
 
 (use-package dianyou
-  :after (org gnus)
-  :defer tpetersen_mickey_mastering_emacs.pdf
+  :commands (gnus)
   )
 
 (eval-after-load 'gnus-group
@@ -887,15 +879,11 @@ Defaults to Sly because it has better integration with Nyxt."
 
 
 (use-package projectile
-  :after (treemacs ivy counsel)
-  :config
+  :init
   (projectile-mode +1)
-
-(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-(setq projectile-indexing-method 'native)
-(setq projectile-completion-system 'ivy)
-(setq projectile-file-exists-remote-cache-expire (* 5 60))
-(setq projectile-require-project-root t))
+  :bind (:map projectile-mode-map
+              ("s-p" . projectile-command-map)
+              ("C-c p" . projectile-command-map)))
 
 (defun select-line ()
  (interactive)
@@ -907,14 +895,15 @@ Defaults to Sly because it has better integration with Nyxt."
 (global-set-key (kbd "C-c l") 'select-line)
 
 (use-package ivy
-    :defer nil
-   :config
+      :commands (counsel M-x counsel-git counsel-ag counsel-locate counsel-minibuffer-history counsel-describe-variable counsel-find-library counsel-unicode-char)
+   :init
    (ivy-mode 1)
+   :config
    (setq ivy-use-virtual-buffers t)
    (setq enable-recursive-minibuffers t))
 
 (use-package counsel
- :after (ivy)
+ :commands (counsel M-x counsel-git counsel-ag counsel-locate counsel-minibuffer-history counsel-describe-variable counsel-find-library counsel-unicode-char)
  :bind (("M-x" . counsel-M-x)
          ("<f1> f" . counsel-describe-function)
          ("<f1> v" . counsel-describe-variable)
@@ -938,7 +927,6 @@ Defaults to Sly because it has better integration with Nyxt."
 
 (use-package treemacs-nerd-icons
   :demand t
-  :after (treemacs)
   :config
   (treemacs-load-theme "nerd-icons"))
 
@@ -987,23 +975,147 @@ Defaults to Sly because it has better integration with Nyxt."
   )
 
     ;; Schedule the theme switch function to run every hour
-    (run-at-time "00:00" (* 10 60) 'switch-theme-based-on-time)
+    (run-at-time "00:00" (* 30 60) 'switch-theme-based-on-time)
+    (global-set-key (kbd "S-C-<left>") 'shrink-window-horizontally)
+  (global-set-key (kbd "S-C-<right>") 'enlarge-window-horizontally)
+  (global-set-key (kbd "S-C-<down>") 'shrink-window)
+  (global-set-key (kbd "S-C-<up>") 'enlarge-window)
 
 (use-package guru-mode
-:defer nil
-:config
+:init
 (guru-global-mode +1))
 
 (use-package auto-compile
-)
-(use-package company-quickhelp
-  :after (lsp-mode lsp-ui ivy counsel company)
-  :hook (company-mode . company-quickhelp-mode))
-(use-package go-mode
-  :after (lsp-mode lsp-ui ivy counsel company))
-(use-package lsp-haskell
-  :after (lsp-mode lsp-ui haskell-mode ivy counsel company))
-(use-package haskell-mode
-   :defer 20
-  :after (lsp-mode lsp-ui ivy counsel company))
-(display-time-mode 1)
+      :config
+      (auto-compile-on-load-mode)
+(auto-compile-on-save-mode)
+    )
+    (use-package company-quickhelp
+      :hook (company-mode . company-quickhelp-mode))
+  (use-package go-mode
+   :magic ("\\.go\\'" . (lambda () (go-mode 1)))
+   :config
+   ;; Additional configuration for go-mode can go here
+   )
+
+  (use-package lsp-haskell
+
+   )
+
+  (use-package haskell-mode
+   :magic ("\\.hs\\'" . (lambda () (haskell-mode 1)))
+   :config
+   ;; Additional configuration for haskell-mode can go here
+   )
+
+(use-package exwm
+                    :demand t
+                    :config
+                    (defun increase-brightness ()
+                       (interactive)
+                       (shell-command "lux -a 10%"))
+         (defun flameshot ()
+           (interactive)
+           (shell-command "flameshot gui"))
+                    (defun decrease-brightness ()
+                       (interactive)
+                       (shell-command "lux -s 10%"))
+
+                    (defun increase-volume ()
+                       (interactive)
+                       (shell-command "pamixer --increase 5"))
+
+                    (defun decrease-volume ()
+                       (interactive)
+                       (shell-command "pamixer --decrease 5"))
+
+                    (defun toggle-volume ()
+                       (interactive)
+                       (shell-command "pamixer --toggle-mute"))
+               (unless (get 'exwm-workspace-number 'saved-value)
+                   (setq exwm-workspace-number 4))
+                 ;; Make class name the buffer name
+                 (add-hook 'exwm-update-class-hook
+                           (lambda ()
+                             (exwm-workspace-rename-buffer exwm-class-name)))
+                 ;; Global keybindings.
+                 (unless (get 'exwm-input-global-keys 'saved-value)
+                   (setq exwm-input-global-keys
+                         `(
+                           ;; 's-r': Reset (to line-mode).
+                           ([?\s-r] . exwm-reset)
+                           ;; 's-w': Switch workspace.
+                           ([?\s-w] . exwm-workspace-switch)
+                           ;; 's-d': Launch application.
+                           ([?\s-d] . (lambda (command)
+                                        (interactive (list (read-shell-command "$ ")))
+                                        (start-process-shell-command command nil command)))
+                           ;; 's-N': Switch to certain workspace.
+                           ,@(mapcar (lambda (i)
+                                       `(,(kbd (format "s-%d" i)) .
+                                         (lambda ()
+                                           (interactive)
+                                           (exwm-workspace-switch-create ,i))))
+                                     (number-sequence 0 9))
+
+			       ,@(cl-mapcar (lambda (c n)
+                         `(,(kbd (format "s-%c" c)) .
+                           (lambda ()
+                             (interactive)
+                             (exwm-workspace-move-window ,n)
+                             (exwm-workspace-switch ,n))))
+                       '(?\) ?! ?@ ?# ?$ ?% ?^ ?& ?* ?\()
+                       ;; '(?\= ?! ?\" ?# ?¤ ?% ?& ?/ ?\( ?\))
+                       (number-sequence 0 9))
+
+			     )))
+                 ;; Line-editing shortcuts
+                 (unless (get 'exwm-input-simulation-keys 'saved-value)
+                   (setq exwm-input-simulation-keys
+                         '(([?\C-b] . [left])
+                           ([?\C-f] . [right])
+                           ([?\C-p] . [up])
+                           ([?\C-n] . [down])
+                           ([?\C-a] . [home])
+                           ([?\C-e] . [end])
+                           ([?\M-v] . [prior])
+             	      
+                           ([?\C-v] . [next])
+             		  ([?\C-y] . ?\C-v)
+             		  ([?\M-w] . ?\C-c)
+             		  ([?\M-a] . ?\C-a)
+                           ([?\C-d] . [delete])
+                           ([?\C-k] . [S-end delete])
+
+)))
+                 
+                    ;; Bind keys for brightness control
+                    (exwm-input-set-key (kbd "<XF86MonBrightnessUp>") 'increase-brightness)
+                    (exwm-input-set-key (kbd "<XF86MonBrightnessDown>") 'decrease-brightness)
+
+           	 (exwm-input-set-key (kbd "<print>") 'flameshot)
+                    ;; Bind keys for volume control
+                    (exwm-input-set-key (kbd "<XF86AudioRaiseVolume>") 'increase-volume)
+                    (exwm-input-set-key (kbd "<XF86AudioLowerVolume>") 'decrease-volume)
+                    (exwm-input-set-key (kbd "<XF86AudioMute>") 'toggle-volume)
+    ;;   (defmacro bind-workspace-move-key (workspace-number)
+    ;;    (unless (integerp workspace-number)
+    ;;       (error "workspace-number must be an integer"))
+    ;;    `(exwm-input-set-key (kbd ,(format "C-s %d" workspace-number))
+    ;;                          (lambda ()
+    ;;                            (interactive)
+    ;;                            (exwm-workspace-move-window ,workspace-number))))
+      
+    ;; (mapc (lambda (i) (bind-workspace-move-key i)) (number-sequence 1 10))
+   ;; (let ((workspace-numbers '(2 3 4 5 6 7 8 9 10)))
+   ;;(dolist (num workspace-numbers)
+   ;;   (setq exwm-input-global-keys
+            ;;(append exwm-input-global-keys
+               ;;    `((,(kbd (format "C-s %d" num)) . (lambda () (interactive) (exwm-workspace-move-window ,num))))))))
+                    ;; Enable exwm-systray
+             (use-package exwm-modeline
+               :after (exwm))
+             (add-hook 'exwm-init-hook #'exwm-modeline-mode)
+                    (setq exwm-systemtray-height 16)
+                    (exwm-enable)
+               	 )
