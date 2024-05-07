@@ -1,1 +1,1 @@
-/home/erel/exwm/init-org/init.org
+init-org/init.org
