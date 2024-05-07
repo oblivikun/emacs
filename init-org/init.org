@@ -1,14 +1,14 @@
-*** My Emacs Configuration
+** My Emacs Configuration
 A fast and sane emacs configuration with the stuff that i use configured, these stuff are:
 - Gnus for newsreading
  - Ivy for minibuffer completion because i cant with helm(no swiper because i also hate that)
 - A funny dashboard
 - Org roam for storing knowledge
 - LSP stuff
-** Screenshots and Stuff i Guess
+*** Screenshots and Stuff i Guess
 #+CAPTION: Editing the init file and gnus
 [[../img/a.png]] [[../img/b.png]]
-* Garbage collection and performance tweaks
+**** Garbage collection and performance tweaks
 Here we use gcmh for better garbage collection, make the initial-major-mode fundemental mode
 and do more performance tweaks. - moved to early-init.el
 #+BEGIN_SRC emacs-lisp
@@ -33,12 +33,12 @@ and do more performance tweaks. - moved to early-init.el
 
 
       #+END_SRC
-* Startup hook
+**** Startup hook
 This turns on gcmh, tells us our startup time and turns on ivy - moved to early-init
 #+BEGIN_SRC emacs-lisp
 
 #+END_SRC
-* Small configurations to make emacs bearable
+**** Small configurations to make emacs bearable
 #+BEGIN_SRC emacs-lisp
       (defun efs/display-startup-time ()
         (message "Emacs loaded in %s with %d garbage collections."
@@ -67,12 +67,12 @@ This turns on gcmh, tells us our startup time and turns on ivy - moved to early-
 #+END_SRC
 
 *** Packages
-* Some notes
+**** Some notes
 Most of these are deffered to optimize startup time.
-* The actual stuff
+**** The actual stuff
 Dirvish
 #+BEGIN_SRC emacs-lisp
-     (use-package dirvish
+(use-package dirvish
     :commands (dirvish) ;; Specify the command to load Dirvish
     :config
   (dirvish-override-dired-mode)
@@ -210,7 +210,7 @@ Slime - Very nice when i do stuff with common lisp
 
   #+END_SRC
 
-*  Nyxt browser configurations for slime
+***  Nyxt browser configurations for slime
 Use sly to evaluate common lisp because it has better integration with nyxt.
 #+BEGIN_SRC emacs-lisp
   (defcustom cl-ide 'slime
@@ -587,11 +587,10 @@ Decode an ENCODED link containing some elisp. This is for the '.ag91' links
        read
        eval))
 #+END_SRC
-* End of the nyxt stuff
 #+BEGIN_SRC emacs-lisp
 (provide 'emacs-with-nyxt)
 #+END_SRC
-* LSP stuff - turn off some things that make performance worse and some stuff i just like
+*** LSP stuff - turn off some things that make performance worse and some stuff i just like
 #+BEGIN_SRC emacs-lisp
 
   (use-package lsp-mode
@@ -636,7 +635,7 @@ Decode an ENCODED link containing some elisp. This is for the '.ag91' links
 ;;  (add-to-list 'eglot-server-programs
 ;;                '(emacs-lisp-mode . ("emacs-lsp" "--stdio"))))
 #+END_SRC
-* My custom keybinds for terminal stuff because i like a terminal at the bottom
+*** My custom keybinds for terminal stuff because i like a terminal at the bottom
 Split the window and open a terminal in the new window, taking only a quarter of the screen.
 Height of top window is 1/4 of the frame height.
 #+BEGIN_SRC emacs-lisp
@@ -683,10 +682,11 @@ Make the hydra
 
 	    (global-set-key (kbd "C-c t") 'hydra-terminal-python-manager/body)
 #+END_SRC
-* Org Mode Configs
+*** Org Mode Configs
 Make org mode default for .org files
 #+BEGIN_SRC emacs-lisp
-(add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
+  (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
+  (setq org-startup-indented t)
 #+END_SRC
 Org - Roam
 MAKE SURE TO MAKE THE DIRECTORY ~/roam
@@ -879,7 +879,7 @@ Elcord - unnecessecary package i use to flex my emacs.
  )
 
   #+END_SRC
-* Latex stuff
+*** Latex stuff
 load auctex
 #+BEGIN_SRC emacs-lisp
     (use-package auctex
@@ -941,7 +941,7 @@ Magit - i dont use it that much
     :commands (magit-clone magit magit-push magit-commit magit-stage-modified magit-stage-file)
     )
 #+END_SRC
-* GNUS stuff
+*** GNUS stuff
 I really like gnus :D makes it use smtp and some hydra stuff i took from a guide.
 see https://github.com/redguardtoo/mastering-emacs-in-one-year-guide/blob/master/gnus-guide-en.org
 #+BEGIN_SRC emacs-lisp
@@ -1093,11 +1093,8 @@ Another hydra for message-mode
   (local-set-key (kbd "C-c C-y") 'hydra-message/body))
 (add-hook 'message-mode-hook 'message-mode-hook-hydra-setup)
 #+END_SRC
-* The end of the gnus stuff
-Some tab bar stuff because i also love this
-#+BEGIN_SRC emacs-lisp
-#+END_SRC
-* Projectile because i absoloutely love this :D
+
+*** Projectile because i absoloutely love this :D
 #+BEGIN_SRC emacs-lisp
 
 (use-package projectile
@@ -1119,7 +1116,7 @@ Some tab bar stuff because i also love this
     (setq delete-selection-mode nil))) 
 (global-set-key (kbd "C-c l") 'select-line)
 #+END_SRC
-* IVY
+*** IVY
 i dont use swiper because i hate how it looks
 #+BEGIN_SRC emacs-lisp
     (use-package ivy
@@ -1196,7 +1193,7 @@ Indent-guide
   #+BEGIN_SRC emacs-lisp
    (setq TeX-show-compilation nil)
     #+END_SRC
-Switch themes at certain times
+**** Theming
 #+BEGIN_SRC emacs-lisp
   (use-package solarized-theme
     :defer 10
@@ -1232,7 +1229,7 @@ Guru mode because i have bad habits
 :init
 (guru-global-mode +1))
 #+END_SRC
-auto-compile
+**** More lsp configs
 #+BEGIN_SRC emacs-lisp
       (use-package auto-compile
         :config
@@ -1257,118 +1254,143 @@ auto-compile
      ;; Additional configuration for haskell-mode can go here
      )
 #+END_SRC
-** Exwm
+*** Exwm
 #+BEGIN_SRC emacs-lisp
 
                      (use-package exwm
                       :demand t
                       :config
-                      (defun increase-brightness ()
-                         (interactive)
-                         (shell-command "lux -a 10%"))
-           (defun flameshot ()
-             (interactive)
-             (shell-command "flameshot gui"))
-                      (defun decrease-brightness ()
-                         (interactive)
-                         (shell-command "lux -s 10%"))
+  		    #+END_SRC
+		    Brightness control using lux, [[https://github.com/Ventto/lux]]
+		    #+BEGIN_SRC emacs-lisp
 
-                      (defun increase-volume ()
-                         (interactive)
-                         (shell-command "pamixer --increase 5"))
+		       (defun increase-brightness ()
+		          (interactive)
+		          (shell-command "lux -a 10%"))
 
-                      (defun decrease-volume ()
-                         (interactive)
-                         (shell-command "pamixer --decrease 5"))
+		      (defun decrease-brightness ()
+		        (interactive)
+		        (shell-command "lux -s 10%"))
 
-                      (defun toggle-volume ()
-                         (interactive)
-                         (shell-command "pamixer --toggle-mute"))
-                 (unless (get 'exwm-workspace-number 'saved-value)
-                     (setq exwm-workspace-number 4))
-                   ;; Make class name the buffer name
-                   (add-hook 'exwm-update-class-hook
-                             (lambda ()
-                               (exwm-workspace-rename-buffer exwm-class-name)))
-                   ;; Global keybindings.
-                   (unless (get 'exwm-input-global-keys 'saved-value)
-                     (setq exwm-input-global-keys
-                           `(
-                             ;; 's-r': Reset (to line-mode).
-                             ([?\s-r] . exwm-reset)
-                             ;; 's-w': Switch workspace.
-                             ([?\s-w] . exwm-workspace-switch)
-                             ;; 's-d': Launch application.
-                             ([?\s-d] . (lambda (command)
-                                          (interactive (list (read-shell-command "$ ")))
-                                          (start-process-shell-command command nil command)))
-                             ;; 's-N': Switch to certain workspace.
-                             ,@(mapcar (lambda (i)
-                                         `(,(kbd (format "s-%d" i)) .
-                                           (lambda ()
-                                             (interactive)
-                                             (exwm-workspace-switch-create ,i))))
-                                       (number-sequence 0 9))
+		     #+END_SRC
+		     Screenshots with flameshot
+		     #+BEGIN_SRC emacs-lisp
+		                (defun flameshot ()
+		                  (interactive)
+		                  (shell-command "flameshot gui"))
+		       #+END_SRC
+		       
+Volume Control using pamixer [[https://github.com/cdemoulins/pamixer]]
+#+BEGIN_SRC emacs-lisp
+  (defun increase-volume ()
+                           (interactive)
+                           (shell-command "pamixer --increase 5"))
 
-  			       ,@(cl-mapcar (lambda (c n)
-                           `(,(kbd (format "s-%c" c)) .
-                             (lambda ()
-                               (interactive)
-                               (exwm-workspace-move-window ,n)
-                               (exwm-workspace-switch ,n))))
-                         '(?\) ?! ?@ ?# ?$ ?% ?^ ?& ?* ?\()
-                         ;; '(?\= ?! ?\" ?# ?¤ ?% ?& ?/ ?\( ?\))
-                         (number-sequence 0 9))
+                        (defun decrease-volume ()
+                           (interactive)
+                           (shell-command "pamixer --decrease 5"))
 
-  			     )))
-                   ;; Line-editing shortcuts
-                   (unless (get 'exwm-input-simulation-keys 'saved-value)
-                     (setq exwm-input-simulation-keys
-                           '(([?\C-b] . [left])
-                             ([?\C-f] . [right])
-                             ([?\C-p] . [up])
-                             ([?\C-n] . [down])
-                             ([?\C-a] . [home])
-                             ([?\C-e] . [end])
-                             ([?\M-v] . [prior])
-               	      
-                             ([?\C-v] . [next])
-               		  ([?\C-y] . ?\C-v)
-               		  ([?\M-w] . ?\C-c)
-               		  ([?\M-a] . ?\C-a)
-                             ([?\C-d] . [delete])
-                             ([?\C-k] . [S-end delete])
+                        (defun toggle-volume ()
+                           (interactive)
+                           (shell-command "pamixer --toggle-mute"))
+  #+END_SRC
+  Set a number of workspaces
+  #+BEGIN_SRC emacs-lisp
+                   (unless (get 'exwm-workspace-number 'saved-value)
+                       (setq exwm-workspace-number 4))
+  #+END_SRC
+Make window class name emacs buffer name so i can C-x b
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'exwm-update-class-hook
+                               (lambda ()
+                                 (exwm-workspace-rename-buffer exwm-class-name)))
+  #+END_SRC
+Keybindings
+| Key                  | Action                                   |
+| Super + r            | reset to line mode                       |
+| Super + w            | Switch workspace interactively           |
+| Super + d            | Launch program                           |
+| Super + 1-10         | Switch to workspace                      |
+| Super + Shift + 1-10 | Move window to workspace                 |
+| C-b                  | Back 1 character(works in other windows) |
+| C-f                  | Forward 1 character                      |
+| C-p                  | Up one line                              |
+| C-n                  | Down one line                            |
+| C-a                  | Move to start of line                    |
+| C-e                  | Move to end of line                      |
+| C-v                  | Next page                                |
+| M-w                  | Copy                                     |
+| C-y                  | Paste                                    |
+| M-a                  | Equivalent of C-a  in CUA bindings       |
+| C-d                  | delete in front of cursor                |
+| Brightness up        | Increase brightness with lux             |
+| Brightness down      | Decrease brightness with lux             |
+| Printscrn            | Take screenshot                          |
+| Volume up            | Increase volume with pamixer             |
+| Volume down          | Decrease volume with pamixer             |
+| Volume mute          | Toggle volume with pamixer               |
+#+BEGIN_SRC emacs-lisp
+  (unless (get 'exwm-input-global-keys 'saved-value)
+                         (setq exwm-input-global-keys
+                               `(
+                                 ([?\s-r] . exwm-reset)
+                                 ([?\s-w] . exwm-workspace-switch)
+                                 ([?\s-d] . (lambda (command)
+                                              (interactive (list (read-shell-command "$ ")))
+                                              (start-process-shell-command command nil command)))
+                                 ,@(mapcar (lambda (i)
+                                             `(,(kbd (format "s-%d" i)) .
+                                               (lambda ()
+                                                 (interactive)
+                                                 (exwm-workspace-switch-create ,i))))
+                                           (number-sequence 0 9))
 
-  )))
-                   
-                      ;; Bind keys for brightness control
-                      (exwm-input-set-key (kbd "<XF86MonBrightnessUp>") 'increase-brightness)
-                      (exwm-input-set-key (kbd "<XF86MonBrightnessDown>") 'decrease-brightness)
+      			       ,@(cl-mapcar (lambda (c n)
+                               `(,(kbd (format "s-%c" c)) .
+                                 (lambda ()
+                                   (interactive)
+                                   (exwm-workspace-move-window ,n)
+                                   (exwm-workspace-switch ,n))))
+                             '(?\) ?! ?@ ?# ?$ ?% ?^ ?& ?* ?\()
+                             ;; '(?\= ?! ?\" ?# ?¤ ?% ?& ?/ ?\( ?\))
+                             (number-sequence 0 9))
 
-             	 (exwm-input-set-key (kbd "<print>") 'flameshot)
-                      ;; Bind keys for volume control
-                      (exwm-input-set-key (kbd "<XF86AudioRaiseVolume>") 'increase-volume)
-                      (exwm-input-set-key (kbd "<XF86AudioLowerVolume>") 'decrease-volume)
-                      (exwm-input-set-key (kbd "<XF86AudioMute>") 'toggle-volume)
-      ;;   (defmacro bind-workspace-move-key (workspace-number)
-      ;;    (unless (integerp workspace-number)
-      ;;       (error "workspace-number must be an integer"))
-      ;;    `(exwm-input-set-key (kbd ,(format "C-s %d" workspace-number))
-      ;;                          (lambda ()
-      ;;                            (interactive)
-      ;;                            (exwm-workspace-move-window ,workspace-number))))
-        
-      ;; (mapc (lambda (i) (bind-workspace-move-key i)) (number-sequence 1 10))
-     ;; (let ((workspace-numbers '(2 3 4 5 6 7 8 9 10)))
-     ;;(dolist (num workspace-numbers)
-     ;;   (setq exwm-input-global-keys
-              ;;(append exwm-input-global-keys
-                 ;;    `((,(kbd (format "C-s %d" num)) . (lambda () (interactive) (exwm-workspace-move-window ,num))))))))
-                      ;; Enable exwm-systray
-               (use-package exwm-modeline
-                 :after (exwm))
-               (add-hook 'exwm-init-hook #'exwm-modeline-mode)
-                      (setq exwm-systemtray-height 16)
-                      (exwm-enable)
-                 	 )
+      			     )))
+                       (unless (get 'exwm-input-simulation-keys 'saved-value)
+                         (setq exwm-input-simulation-keys
+                               '(([?\C-b] . [left])
+                                 ([?\C-f] . [right])
+                                 ([?\C-p] . [up])
+                                 ([?\C-n] . [down])
+                                 ([?\C-a] . [home])
+                                 ([?\C-e] . [end])
+                                 ([?\M-v] . [prior])
+                   	      
+                                 ([?\C-v] . [next])
+                   		  ([?\C-y] . ?\C-v)
+                   		  ([?\M-w] . ?\C-c)
+                   		  ([?\M-a] . ?\C-a)
+                                 ([?\C-d] . [delete])
+                                 ([?\C-k] . [S-end delete])
+
+      )))
+                       
+                          ;; Bind keys for brightness control
+                          (exwm-input-set-key (kbd "<XF86MonBrightnessUp>") 'increase-brightness)
+                          (exwm-input-set-key (kbd "<XF86MonBrightnessDown>") 'decrease-brightness)
+
+                 	 (exwm-input-set-key (kbd "<print>") 'flameshot)
+                          ;; Bind keys for volume control
+                          (exwm-input-set-key (kbd "<XF86AudioRaiseVolume>") 'increase-volume)
+                          (exwm-input-set-key (kbd "<XF86AudioLowerVolume>") 'decrease-volume)
+                          (exwm-input-set-key (kbd "<XF86AudioMute>") 'toggle-volume)
+  #+END_SRC
+  Modeline Shows in exwm windows
+  #+BEGIN_SRC emacs-lisp
+                   (use-package exwm-modeline
+                     :after (exwm))
+                   (add-hook 'exwm-init-hook #'exwm-modeline-mode)
+                          (setq exwm-systemtray-height 16)
+                          (exwm-enable)
+                     	 )
 #+END_SRC

@@ -1009,113 +1009,112 @@ Defaults to Sly because it has better integration with Nyxt."
    )
 
 (use-package exwm
-                    :demand t
-                    :config
-                    (defun increase-brightness ()
-                       (interactive)
-                       (shell-command "lux -a 10%"))
-         (defun flameshot ()
-           (interactive)
-           (shell-command "flameshot gui"))
-                    (defun decrease-brightness ()
-                       (interactive)
-                       (shell-command "lux -s 10%"))
+ :demand t
+ :config
 
-                    (defun increase-volume ()
-                       (interactive)
-                       (shell-command "pamixer --increase 5"))
+(defun increase-brightness ()
+    (interactive)
+    (shell-command "lux -a 10%"))
 
-                    (defun decrease-volume ()
-                       (interactive)
-                       (shell-command "pamixer --decrease 5"))
+(defun decrease-brightness ()
+  (interactive)
+  (shell-command "lux -s 10%"))
 
-                    (defun toggle-volume ()
-                       (interactive)
-                       (shell-command "pamixer --toggle-mute"))
-               (unless (get 'exwm-workspace-number 'saved-value)
-                   (setq exwm-workspace-number 4))
-                 ;; Make class name the buffer name
-                 (add-hook 'exwm-update-class-hook
-                           (lambda ()
-                             (exwm-workspace-rename-buffer exwm-class-name)))
-                 ;; Global keybindings.
-                 (unless (get 'exwm-input-global-keys 'saved-value)
-                   (setq exwm-input-global-keys
-                         `(
-                           ;; 's-r': Reset (to line-mode).
-                           ([?\s-r] . exwm-reset)
-                           ;; 's-w': Switch workspace.
-                           ([?\s-w] . exwm-workspace-switch)
-                           ;; 's-d': Launch application.
-                           ([?\s-d] . (lambda (command)
-                                        (interactive (list (read-shell-command "$ ")))
-                                        (start-process-shell-command command nil command)))
-                           ;; 's-N': Switch to certain workspace.
-                           ,@(mapcar (lambda (i)
-                                       `(,(kbd (format "s-%d" i)) .
-                                         (lambda ()
-                                           (interactive)
-                                           (exwm-workspace-switch-create ,i))))
-                                     (number-sequence 0 9))
+(defun flameshot ()
+  (interactive)
+  (shell-command "flameshot gui"))
 
-			       ,@(cl-mapcar (lambda (c n)
-                         `(,(kbd (format "s-%c" c)) .
-                           (lambda ()
-                             (interactive)
-                             (exwm-workspace-move-window ,n)
-                             (exwm-workspace-switch ,n))))
-                       '(?\) ?! ?@ ?# ?$ ?% ?^ ?& ?* ?\()
-                       ;; '(?\= ?! ?\" ?# ?¤ ?% ?& ?/ ?\( ?\))
-                       (number-sequence 0 9))
+(defun increase-volume ()
+                         (interactive)
+                         (shell-command "pamixer --increase 5"))
 
-			     )))
-                 ;; Line-editing shortcuts
-                 (unless (get 'exwm-input-simulation-keys 'saved-value)
-                   (setq exwm-input-simulation-keys
-                         '(([?\C-b] . [left])
-                           ([?\C-f] . [right])
-                           ([?\C-p] . [up])
-                           ([?\C-n] . [down])
-                           ([?\C-a] . [home])
-                           ([?\C-e] . [end])
-                           ([?\M-v] . [prior])
-             	      
-                           ([?\C-v] . [next])
-             		  ([?\C-y] . ?\C-v)
-             		  ([?\M-w] . ?\C-c)
-             		  ([?\M-a] . ?\C-a)
-                           ([?\C-d] . [delete])
-                           ([?\C-k] . [S-end delete])
+                      (defun decrease-volume ()
+                         (interactive)
+                         (shell-command "pamixer --decrease 5"))
 
-)))
-                 
-                    ;; Bind keys for brightness control
-                    (exwm-input-set-key (kbd "<XF86MonBrightnessUp>") 'increase-brightness)
-                    (exwm-input-set-key (kbd "<XF86MonBrightnessDown>") 'decrease-brightness)
+                      (defun toggle-volume ()
+                         (interactive)
+                         (shell-command "pamixer --toggle-mute"))
 
-           	 (exwm-input-set-key (kbd "<print>") 'flameshot)
-                    ;; Bind keys for volume control
-                    (exwm-input-set-key (kbd "<XF86AudioRaiseVolume>") 'increase-volume)
-                    (exwm-input-set-key (kbd "<XF86AudioLowerVolume>") 'decrease-volume)
-                    (exwm-input-set-key (kbd "<XF86AudioMute>") 'toggle-volume)
-    ;;   (defmacro bind-workspace-move-key (workspace-number)
-    ;;    (unless (integerp workspace-number)
-    ;;       (error "workspace-number must be an integer"))
-    ;;    `(exwm-input-set-key (kbd ,(format "C-s %d" workspace-number))
-    ;;                          (lambda ()
-    ;;                            (interactive)
-    ;;                            (exwm-workspace-move-window ,workspace-number))))
-      
-    ;; (mapc (lambda (i) (bind-workspace-move-key i)) (number-sequence 1 10))
-   ;; (let ((workspace-numbers '(2 3 4 5 6 7 8 9 10)))
-   ;;(dolist (num workspace-numbers)
-   ;;   (setq exwm-input-global-keys
-            ;;(append exwm-input-global-keys
-               ;;    `((,(kbd (format "C-s %d" num)) . (lambda () (interactive) (exwm-workspace-move-window ,num))))))))
-                    ;; Enable exwm-systray
-             (use-package exwm-modeline
-               :after (exwm))
-             (add-hook 'exwm-init-hook #'exwm-modeline-mode)
-                    (setq exwm-systemtray-height 16)
-                    (exwm-enable)
-               	 )
+(unless (get 'exwm-workspace-number 'saved-value)
+    (setq exwm-workspace-number 4))
+
+(add-hook 'exwm-update-class-hook
+                             (lambda ()
+                               (exwm-workspace-rename-buffer exwm-class-name)))
+
+(unless (get 'exwm-input-global-keys 'saved-value)
+                       (setq exwm-input-global-keys
+                             `(
+                               ([?\s-r] . exwm-reset)
+                               ([?\s-w] . exwm-workspace-switch)
+                               ([?\s-d] . (lambda (command)
+                                            (interactive (list (read-shell-command "$ ")))
+                                            (start-process-shell-command command nil command)))
+                               ,@(mapcar (lambda (i)
+                                           `(,(kbd (format "s-%d" i)) .
+                                             (lambda ()
+                                               (interactive)
+                                               (exwm-workspace-switch-create ,i))))
+                                         (number-sequence 0 9))
+
+    			       ,@(cl-mapcar (lambda (c n)
+                             `(,(kbd (format "s-%c" c)) .
+                               (lambda ()
+                                 (interactive)
+                                 (exwm-workspace-move-window ,n)
+                                 (exwm-workspace-switch ,n))))
+                           '(?\) ?! ?@ ?# ?$ ?% ?^ ?& ?* ?\()
+                           ;; '(?\= ?! ?\" ?# ?¤ ?% ?& ?/ ?\( ?\))
+                           (number-sequence 0 9))
+
+    			     )))
+                     (unless (get 'exwm-input-simulation-keys 'saved-value)
+                       (setq exwm-input-simulation-keys
+                             '(([?\C-b] . [left])
+                               ([?\C-f] . [right])
+                               ([?\C-p] . [up])
+                               ([?\C-n] . [down])
+                               ([?\C-a] . [home])
+                               ([?\C-e] . [end])
+                               ([?\M-v] . [prior])
+                 	      
+                               ([?\C-v] . [next])
+                 		  ([?\C-y] . ?\C-v)
+                 		  ([?\M-w] . ?\C-c)
+                 		  ([?\M-a] . ?\C-a)
+                               ([?\C-d] . [delete])
+                               ([?\C-k] . [S-end delete])
+
+    )))
+                     
+                        ;; Bind keys for brightness control
+                        (exwm-input-set-key (kbd "<XF86MonBrightnessUp>") 'increase-brightness)
+                        (exwm-input-set-key (kbd "<XF86MonBrightnessDown>") 'decrease-brightness)
+
+               	 (exwm-input-set-key (kbd "<print>") 'flameshot)
+                        ;; Bind keys for volume control
+                        (exwm-input-set-key (kbd "<XF86AudioRaiseVolume>") 'increase-volume)
+                        (exwm-input-set-key (kbd "<XF86AudioLowerVolume>") 'decrease-volume)
+                        (exwm-input-set-key (kbd "<XF86AudioMute>") 'toggle-volume)
+        ;;   (defmacro bind-workspace-move-key (workspace-number)
+        ;;    (unless (integerp workspace-number)
+        ;;       (error "workspace-number must be an integer"))
+        ;;    `(exwm-input-set-key (kbd ,(format "C-s %d" workspace-number))
+        ;;                          (lambda ()
+        ;;                            (interactive)
+        ;;                            (exwm-workspace-move-window ,workspace-number))))
+          
+        ;; (mapc (lambda (i) (bind-workspace-move-key i)) (number-sequence 1 10))
+       ;; (let ((workspace-numbers '(2 3 4 5 6 7 8 9 10)))
+       ;;(dolist (num workspace-numbers)
+       ;;   (setq exwm-input-global-keys
+                ;;(append exwm-input-global-keys
+                   ;;    `((,(kbd (format "C-s %d" num)) . (lambda () (interactive) (exwm-workspace-move-window ,num))))))))
+                        ;; Enable exwm-systray
+                 (use-package exwm-modeline
+                   :after (exwm))
+                 (add-hook 'exwm-init-hook #'exwm-modeline-mode)
+                        (setq exwm-systemtray-height 16)
+                        (exwm-enable)
+                   	 )
