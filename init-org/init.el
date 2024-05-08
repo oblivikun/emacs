@@ -20,24 +20,28 @@
 
 
 (defun efs/display-startup-time ()
-      (message "Emacs loaded in %s with %d garbage collections."
-  	       (format "%.2f seconds"
-  		       (float-time
-  		       (time-subtract after-init-time before-init-time)))
-  	       gcs-done))
-(defun gc-restore ()
-  (setq gc-cons-threshold 12000000))
-     (add-hook 'emacs-startup-hook #'gc-restore)
-    (add-hook 'emacs-startup-hook #'efs/display-startup-time)
-    (straight-use-package 'use-package)
-      (setq inhibit-startup-message t)
-  (use-package straight
-    :custom
-    
-(setq straight-check-for-modifications 'live-with-find)
+          (message "Emacs loaded in %s with %d garbage collections."
+      	       (format "%.2f seconds"
+      		       (float-time
+      		       (time-subtract after-init-time before-init-time)))
+      	       gcs-done))
+    (defun gc-restore ()
+      (setq gc-cons-threshold 12000000))
+         (add-hook 'emacs-startup-hook #'gc-restore)
+        (add-hook 'emacs-startup-hook #'efs/display-startup-time)
+          (setq inhibit-startup-message t)
+      (use-package straight
+        :custom
+        
+    (setq straight-check-for-modifications 'live-with-find)
 
-    (straight-use-package-by-default t))
-      (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+        (straight-use-package-by-default t))
+          (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+  
+(setq display-line-numbers-type 'relative)
+    
+
+  (setq org-startup-indented t)
 
 (setenv "IN_EMACS" "1")
 
@@ -51,7 +55,7 @@
    )
 
 (use-package treemacs
-  :after (dashboard ivy)
+  :commands (treemacs)
  :config
  (progn
     (add-hook 'treemacs-mode-hook (lambda() (display-line-numbers-mode -1)))
@@ -97,51 +101,57 @@
  (setq dashboard-vertically-center-content t))
 
 (use-package hydra
-  :after (ivy dashboard)
-  :defer t
+  :defer 10
   )
 
 (setq mode-line-end-spaces
-        '(""
-          display-time-string
-          battery-mode-line-string
-	  "GNU Emacs 29.3"
-	      ))
-    (defun my-mode-line/padding ()
-    (let ((r-length (length (format-mode-line mode-line-end-spaces))))
-      (propertize " "
-        'display `(space :align-to (- right ,r-length)))))
-(setq-default mode-line-format
-  '("%e"
-     " %o "
-     "%* "
-     my-modeline-buffer-name
-     my-modeline-major-mode
-           (:eval (my-mode-line/padding))
-      mode-line-end-spaces))
-  
-  
+         '(""
+           display-time-string
+           battery-mode-line-string
+ 	  "GNU Emacs 29.3"
+ 	      ))
+ (defun my-modeline-god-mode-indicator ()
+"Return a string indicating God Mode status for the mode line."
+(if god-local-mode
+     "  "
+   "  "))
+     (defun my-mode-line/padding ()
+     (let ((r-length (length (format-mode-line mode-line-end-spaces))))
+       (propertize " "
+         'display `(space :align-to (- right ,r-length)))))
+ (setq-default mode-line-format
+   '("%e"
+      " %o "
+      "%* "
+      my-modeline-buffer-name
+      my-modeline-major-mode
+            (:eval (my-mode-line/padding))
+	    
+  (:eval (my-modeline-god-mode-indicator))
+       mode-line-end-spaces))
+   
+   
 
-(defvar-local my-modeline-buffer-name
-  '(:eval
-     (when (mode-line-window-selected-p)
-       (propertize (format " %s " (buffer-name))
-         'face '(t :background "#3355bb" :foreground "white" :inherit bold))))
-  "Mode line construct to display the buffer name.")
+ (defvar-local my-modeline-buffer-name
+   '(:eval
+      (when (mode-line-window-selected-p)
+        (propertize (format " %s " (buffer-name))
+          'face '(t :background "#3355bb" :foreground "white" :inherit bold))))
+   "Mode line construct to display the buffer name.")
 
-(put 'my-modeline-buffer-name 'risky-local-variable t)
+ (put 'my-modeline-buffer-name 'risky-local-variable t)
 
-(defvar-local my-modeline-major-mode
-  '(:eval
-     (list
-       (propertize "λ" 'face 'shadow)
-       " "
-       (propertize (capitalize (symbol-name major-mode)) 'face 'bold)))
-  "Mode line construct to display the major mode.")
+ (defvar-local my-modeline-major-mode
+   '(:eval
+      (list
+        (propertize "λ" 'face 'shadow)
+        " "
+        (propertize (capitalize (symbol-name major-mode)) 'face 'bold)))
+   "Mode line construct to display the major mode.")
 
-(put 'my-modeline-major-mode 'risky-local-variable t)
-  (setq-default header-line-format mode-line-format)
-      (setq-default mode-line-format nil)
+ (put 'my-modeline-major-mode 'risky-local-variable t)
+     (setq-default header-line-format mode-line-format)
+       (setq-default mode-line-format nil)
 
 (use-package company
  :defer t
@@ -154,8 +164,8 @@
     company-frontends '(company-pseudo-tooltip-frontend company-preview-frontend)))
 
 (use-package slime
-  :after (lsp-mode ivy counsel)
- :defer t
+  :commands (slime slime-connect)
+ :defer 10
  :hook (lisp-mode . slime-mode))
 
 (defcustom cl-ide 'slime
@@ -476,8 +486,6 @@ Defaults to Sly because it has better integration with Nyxt."
 (provide 'emacs-with-nyxt)
 
 (use-package lsp-mode
-  :after (ivy counsel)
-  :defer t
   :init
   (setq lsp-keymap-prefix "C-c l")
   :hook (
@@ -502,14 +510,12 @@ Defaults to Sly because it has better integration with Nyxt."
   :commands lsp)
 
 (use-package lsp-ui
-  :after (lsp-mode)
- :defer t
+ :defer 12
  :hook (lsp-mode . lsp-ui-mode))
 
 ;; if you are ivy user
 (use-package lsp-ivy
-  :after (lsp-mode)
-  :defer t
+  :defer 12
   :commands lsp-ivy-workspace-symbol)
 
 ;; (add-hook 'prog-mode-hook #'eglot-ensure)
@@ -554,7 +560,6 @@ Defaults to Sly because it has better integration with Nyxt."
 
 (use-package org-roam
   :defer 10
- :after (org)
  :init
  (setq org-roam-directory (file-truename "~/roam/"))
  :custom
@@ -572,14 +577,19 @@ Defaults to Sly because it has better integration with Nyxt."
  )
 
 (setq org-hide-emphasis-markers t)
-  (font-lock-add-keywords 'org-mode
-                        '(("^ *\\([-]\\) "
-                           (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
-  (use-package org-bullets
-    :defer nil
-    :config
-  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
-  (add-hook 'org-mode-hook 'visual-line-mode)
+    (font-lock-add-keywords 'org-mode
+                          '(("^ *\\([-]\\) "
+                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+(use-package olivetti
+  :hook (org-mode . olivetti-mode))
+(use-package org-bullets
+ :ensure t
+ :hook (org-mode . (lambda ()
+                      (org-bullets-mode 1)
+                      (visual-line-mode)))
+ :config
+ ;; Additional configuration can go here
+ )
 
 (defun my-org-todo-toggle ()
   (interactive)
@@ -695,8 +705,7 @@ Defaults to Sly because it has better integration with Nyxt."
   (shell-command "emacs --batch -l ~/.edump -eval '(dump-load-path)' -eval '(dump-emacs-portable \"~/emacs.dump\")'"))
 
 (use-package undo-tree
-   :demand t
-:config
+:init
 (global-undo-tree-mode)
 )
 
@@ -751,13 +760,12 @@ Defaults to Sly because it has better integration with Nyxt."
 (setq rcirc-notify-message "message from %s")
 
 (use-package magit
-  :defer t
-  :after (treemacs ivy)
+  :commands (magit-clone magit magit-push magit-commit magit-stage-modified magit-stage-file)
   )
 
 (setq nnmail-treat-duplicates t)
 (use-package gnus
-  :defer t
+  :commands (gnus)
   )
 
   (setq message-send-mail-function 'smtpmail-send-it)
@@ -766,9 +774,8 @@ Defaults to Sly because it has better integration with Nyxt."
 ;; (epa-file-enable)
 
 (use-package org-mime
-   :after (org gnus)
- :defer t
- :config
+   :commands (org-mime-htmlize)
+   :config
 (setq org-mime-library 'mml))
 
 (defun my-insert-html-signature ()
@@ -783,7 +790,7 @@ Defaults to Sly because it has better integration with Nyxt."
           (lambda ()
             (local-set-key (kbd "C-c M-o") 'org-mime-htmlize)))
 (add-hook 'org-mime-html-hook
-          (lambda ()
+2          (lambda ()
             (org-mime-change-element-style
              "pre" (format "color: %s; background-color: %s; padding: 0.5em;"
                            "#E6E1DC" "#232323"))))
@@ -794,8 +801,7 @@ Defaults to Sly because it has better integration with Nyxt."
              "blockquote" "border-left: 2px solid gray; padding-left: 4px;")))
 
 (use-package dianyou
-  :after (org gnus)
-  :defer tpetersen_mickey_mastering_emacs.pdf
+  :commands (gnus)
   )
 
 (eval-after-load 'gnus-group
@@ -884,18 +890,12 @@ Defaults to Sly because it has better integration with Nyxt."
   (local-set-key (kbd "C-c C-y") 'hydra-message/body))
 (add-hook 'message-mode-hook 'message-mode-hook-hydra-setup)
 
-
-
 (use-package projectile
-  :after (treemacs ivy counsel)
-  :config
+  :init
   (projectile-mode +1)
-
-(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-(setq projectile-indexing-method 'native)
-(setq projectile-completion-system 'ivy)
-(setq projectile-file-exists-remote-cache-expire (* 5 60))
-(setq projectile-require-project-root t))
+  :bind (:map projectile-mode-map
+              ("s-p" . projectile-command-map)
+              ("C-c p" . projectile-command-map)))
 
 (defun select-line ()
  (interactive)
@@ -907,14 +907,15 @@ Defaults to Sly because it has better integration with Nyxt."
 (global-set-key (kbd "C-c l") 'select-line)
 
 (use-package ivy
-    :defer nil
-   :config
+      :commands (counsel M-x counsel-git counsel-ag counsel-locate counsel-minibuffer-history counsel-describe-variable counsel-find-library counsel-unicode-char)
+   :init
    (ivy-mode 1)
+   :config
    (setq ivy-use-virtual-buffers t)
    (setq enable-recursive-minibuffers t))
 
 (use-package counsel
- :after (ivy)
+ :commands (counsel M-x counsel-git counsel-ag counsel-locate counsel-minibuffer-history counsel-describe-variable counsel-find-library counsel-unicode-char)
  :bind (("M-x" . counsel-M-x)
          ("<f1> f" . counsel-describe-function)
          ("<f1> v" . counsel-describe-variable)
@@ -938,7 +939,6 @@ Defaults to Sly because it has better integration with Nyxt."
 
 (use-package treemacs-nerd-icons
   :demand t
-  :after (treemacs)
   :config
   (treemacs-load-theme "nerd-icons"))
 
@@ -987,23 +987,50 @@ Defaults to Sly because it has better integration with Nyxt."
   )
 
     ;; Schedule the theme switch function to run every hour
-    (run-at-time "00:00" (* 10 60) 'switch-theme-based-on-time)
+    (run-at-time "00:00" (* 30 60) 'switch-theme-based-on-time)
 
 (use-package guru-mode
-:defer nil
-:config
+:init
 (guru-global-mode +1))
 
 (use-package auto-compile
-)
-(use-package company-quickhelp
-  :after (lsp-mode lsp-ui ivy counsel company)
-  :hook (company-mode . company-quickhelp-mode))
-(use-package go-mode
-  :after (lsp-mode lsp-ui ivy counsel company))
-(use-package lsp-haskell
-  :after (lsp-mode lsp-ui haskell-mode ivy counsel company))
-(use-package haskell-mode
-   :defer 20
-  :after (lsp-mode lsp-ui ivy counsel company))
-(display-time-mode 1)
+      :config
+      (auto-compile-on-load-mode)
+(auto-compile-on-save-mode)
+    )
+    (use-package company-quickhelp
+      :hook (company-mode . company-quickhelp-mode))
+  (use-package go-mode
+   :magic ("\\.go\\'" . (lambda () (go-mode 1)))
+   :config
+   ;; Additional configuration for go-mode can go here
+   )
+
+  (use-package lsp-haskell
+
+   )
+
+  (use-package haskell-mode
+   :magic ("\\.hs\\'" . (lambda () (haskell-mode 1)))
+   :config
+   ;; Additional configuration for haskell-mode can go here
+   )
+    (global-set-key (kbd "S-C-<left>") 'shrink-window-horizontally)
+  (global-set-key (kbd "S-C-<right>") 'enlarge-window-horizontally)
+  (global-set-key (kbd "S-C-<down>") 'shrink-window)
+  (global-set-key (kbd "S-C-<up>") 'enlarge-window)
+
+(use-package god-mode
+ :commands god-mode-all
+ :config
+ ;; Set the key to toggle God Mode globally
+ (global-set-key (kbd "<escape>") #'god-mode-all)
+ ;; Ensure no buffers are exempt from God Mode
+ (setq god-exempt-major-modes nil)
+ (setq god-exempt-predicates nil)
+ ;; Disable function key translation if desired
+ ;; (setq god-mode-enable-function-key-translation nil)
+  :hook ((prog-mode . god-mode-all)
+      (text-mode . god-mode-all)))
+
+;; Function to activate God Mode after exiting Dashboard mode
