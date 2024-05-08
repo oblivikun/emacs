@@ -42,13 +42,13 @@
 (setenv "IN_EMACS" "1")
 
 (use-package dirvish
-   :commands (dirvish) ;; Specify the command to load Dirvish
-   :config
- (dirvish-override-dired-mode)
- :bind
- 
-:bind (("C-x d" . dirvish-dispatch))
-   )
+    :commands (dirvish) ;; Specify the command to load Dirvish
+    :config
+  (dirvish-override-dired-mode)
+  :bind
+  
+ :bind (("C-x d" . dirvish-dispatch))
+    )
 
 (use-package treemacs
   :commands (treemacs)
@@ -545,6 +545,7 @@ Defaults to Sly because it has better integration with Nyxt."
 (global-set-key (kbd "C-c t") 'hydra-terminal-python-manager/body)
 
 (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
+(setq org-startup-indented t)
 
 (use-package org-roam
   :defer 10
@@ -876,8 +877,6 @@ Defaults to Sly because it has better integration with Nyxt."
   (local-set-key (kbd "C-c C-y") 'hydra-message/body))
 (add-hook 'message-mode-hook 'message-mode-hook-hydra-setup)
 
-
-
 (use-package projectile
   :init
   (projectile-mode +1)
@@ -976,7 +975,7 @@ Defaults to Sly because it has better integration with Nyxt."
 
     ;; Schedule the theme switch function to run every hour
     (run-at-time "00:00" (* 30 60) 'switch-theme-based-on-time)
-    (global-set-key (kbd "S-C-<left>") 'shrink-window-horizontally)
+    (global-set-key (kbd "S-s-<left>") 'shrink-window-horizontally)
   (global-set-key (kbd "S-C-<right>") 'enlarge-window-horizontally)
   (global-set-key (kbd "S-C-<down>") 'shrink-window)
   (global-set-key (kbd "S-C-<up>") 'enlarge-window)
@@ -1043,14 +1042,50 @@ Defaults to Sly because it has better integration with Nyxt."
                              (lambda ()
                                (exwm-workspace-rename-buffer exwm-class-name)))
 
+;; These keys should always pass through to Emacs
+(setq exwm-input-prefix-keys
+  '(?\C-x
+    ?\C-u
+    ?\C-h
+    ?\M-x
+    ?\M-`
+    ?\M-&
+    ?\M-:
+    ?\C-\ ))  ;; Ctrl+Space
+
+(define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
+
+(defhydra exwm-window-resize (:timeout 4)
+("<left>" (exwm-layout-shrink-window-horizontally 10) "shrink h")
+("<right>" (exwm-layout-enlarge-window-horizontally 10) "enlarge h")
+("<up>" (exwm-layout-shrink-window 10) "shrink v")
+("<down>" (exwm-layout-enlarge-window 10) "enlarge v")
+("q" nil "quit" :exit t))
+
 (unless (get 'exwm-input-global-keys 'saved-value)
                        (setq exwm-input-global-keys
                              `(
                                ([?\s-r] . exwm-reset)
                                ([?\s-w] . exwm-workspace-switch)
-                               ([?\s-d] . (lambda (command)
-                                            (interactive (list (read-shell-command "$ ")))
-                                            (start-process-shell-command command nil command)))
+			                ([?\s-r] . exwm-window-resize/body)
+
+		  ;; Toggle floating windows
+		  ([?\s-t] . exwm-floating-toggle-floating)
+
+		  ;; Toggle fullscreen
+		  ([?\s-f] . exwm-layout-toggle-fullscreen)
+
+		  ;; Toggle modeline
+		  ([?\s-m] . exwm-layout-toggle-mode-line)
+
+		  ;; Quit current buffer
+		  ([?\s-q] . kill-current-buffer)
+		  ([?\s-Q] . evil-window-delete)
+
+      ;; Launch applications via shell command
+		  ([?\s-d] . counsel-linux-app)
+		  ([?\s-a] . counsel-switch-buffer)
+                          
                                ,@(mapcar (lambda (i)
                                            `(,(kbd (format "s-%d" i)) .
                                              (lambda ()
@@ -1074,6 +1109,7 @@ Defaults to Sly because it has better integration with Nyxt."
                              '(([?\C-b] . [left])
                                ([?\C-f] . [right])
                                ([?\C-p] . [up])
+			       ([?\C-s] . ?\C-f)
                                ([?\C-n] . [down])
                                ([?\C-a] . [home])
                                ([?\C-e] . [end])
@@ -1097,24 +1133,10 @@ Defaults to Sly because it has better integration with Nyxt."
                         (exwm-input-set-key (kbd "<XF86AudioRaiseVolume>") 'increase-volume)
                         (exwm-input-set-key (kbd "<XF86AudioLowerVolume>") 'decrease-volume)
                         (exwm-input-set-key (kbd "<XF86AudioMute>") 'toggle-volume)
-        ;;   (defmacro bind-workspace-move-key (workspace-number)
-        ;;    (unless (integerp workspace-number)
-        ;;       (error "workspace-number must be an integer"))
-        ;;    `(exwm-input-set-key (kbd ,(format "C-s %d" workspace-number))
-        ;;                          (lambda ()
-        ;;                            (interactive)
-        ;;                            (exwm-workspace-move-window ,workspace-number))))
-          
-        ;; (mapc (lambda (i) (bind-workspace-move-key i)) (number-sequence 1 10))
-       ;; (let ((workspace-numbers '(2 3 4 5 6 7 8 9 10)))
-       ;;(dolist (num workspace-numbers)
-       ;;   (setq exwm-input-global-keys
-                ;;(append exwm-input-global-keys
-                   ;;    `((,(kbd (format "C-s %d" num)) . (lambda () (interactive) (exwm-workspace-move-window ,num))))))))
-                        ;; Enable exwm-systray
-                 (use-package exwm-modeline
-                   :after (exwm))
-                 (add-hook 'exwm-init-hook #'exwm-modeline-mode)
-                        (setq exwm-systemtray-height 16)
-                        (exwm-enable)
-                   	 )
+
+(use-package exwm-modeline
+  :after (exwm))
+(add-hook 'exwm-init-hook #'exwm-modeline-mode)
+       (setq exwm-systemtray-height 16)
+       (exwm-enable)
+  	 )

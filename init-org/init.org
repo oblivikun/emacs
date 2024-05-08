@@ -1218,7 +1218,7 @@ Indent-guide
 
       ;; Schedule the theme switch function to run every hour
       (run-at-time "00:00" (* 30 60) 'switch-theme-based-on-time)
-      (global-set-key (kbd "S-C-<left>") 'shrink-window-horizontally)
+      (global-set-key (kbd "S-s-<left>") 'shrink-window-horizontally)
     (global-set-key (kbd "S-C-<right>") 'enlarge-window-horizontally)
     (global-set-key (kbd "S-C-<down>") 'shrink-window)
     (global-set-key (kbd "S-C-<up>") 'enlarge-window)
@@ -1320,6 +1320,7 @@ Keybindings
 | C-e                  | Move to end of line                      |
 | C-v                  | Next page                                |
 | M-w                  | Copy                                     |
+| C-s                  | Equivalent of C-f in CUA bindings        |
 | C-y                  | Paste                                    |
 | M-a                  | Equivalent of C-a  in CUA bindings       |
 | C-d                  | delete in front of cursor                |
@@ -1329,61 +1330,104 @@ Keybindings
 | Volume up            | Increase volume with pamixer             |
 | Volume down          | Decrease volume with pamixer             |
 | Volume mute          | Toggle volume with pamixer               |
+Prefix keys
 #+BEGIN_SRC emacs-lisp
-  (unless (get 'exwm-input-global-keys 'saved-value)
-                         (setq exwm-input-global-keys
-                               `(
-                                 ([?\s-r] . exwm-reset)
-                                 ([?\s-w] . exwm-workspace-switch)
-                                 ([?\s-d] . (lambda (command)
-                                              (interactive (list (read-shell-command "$ ")))
-                                              (start-process-shell-command command nil command)))
-                                 ,@(mapcar (lambda (i)
-                                             `(,(kbd (format "s-%d" i)) .
-                                               (lambda ()
-                                                 (interactive)
-                                                 (exwm-workspace-switch-create ,i))))
-                                           (number-sequence 0 9))
 
-      			       ,@(cl-mapcar (lambda (c n)
-                               `(,(kbd (format "s-%c" c)) .
-                                 (lambda ()
-                                   (interactive)
-                                   (exwm-workspace-move-window ,n)
-                                   (exwm-workspace-switch ,n))))
-                             '(?\) ?! ?@ ?# ?$ ?% ?^ ?& ?* ?\()
-                             ;; '(?\= ?! ?\" ?# ?¤ ?% ?& ?/ ?\( ?\))
-                             (number-sequence 0 9))
+      ;; These keys should always pass through to Emacs
+  (setq exwm-input-prefix-keys
+    '(?\C-x
+      ?\C-u
+      ?\C-h
+      ?\M-x
+      ?\M-`
+      ?\M-&
+      ?\M-:
+      ?\C-\ ))  ;; Ctrl+Space
+  
+  (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
 
-      			     )))
-                       (unless (get 'exwm-input-simulation-keys 'saved-value)
-                         (setq exwm-input-simulation-keys
-                               '(([?\C-b] . [left])
-                                 ([?\C-f] . [right])
-                                 ([?\C-p] . [up])
-                                 ([?\C-n] . [down])
-                                 ([?\C-a] . [home])
-                                 ([?\C-e] . [end])
-                                 ([?\M-v] . [prior])
-                   	      
-                                 ([?\C-v] . [next])
-                   		  ([?\C-y] . ?\C-v)
-                   		  ([?\M-w] . ?\C-c)
-                   		  ([?\M-a] . ?\C-a)
-                                 ([?\C-d] . [delete])
-                                 ([?\C-k] . [S-end delete])
+  #+END_SRC
+  Resizing
+  #+BEGIN_SRC emacs-lisp
+  (defhydra exwm-window-resize (:timeout 4)
+  ("<left>" (exwm-layout-shrink-window-horizontally 10) "shrink h")
+  ("<right>" (exwm-layout-enlarge-window-horizontally 10) "enlarge h")
+  ("<up>" (exwm-layout-shrink-window 10) "shrink v")
+  ("<down>" (exwm-layout-enlarge-window 10) "enlarge v")
+  ("q" nil "quit" :exit t))
+  #+END_SRC
+  #+BEGIN_SRC emacs-lisp
+    (unless (get 'exwm-input-global-keys 'saved-value)
+                           (setq exwm-input-global-keys
+                                 `(
+                                   ([?\s-r] . exwm-reset)
+                                   ([?\s-w] . exwm-workspace-switch)
+    			                ([?\s-r] . exwm-window-resize/body)
 
-      )))
-                       
-                          ;; Bind keys for brightness control
-                          (exwm-input-set-key (kbd "<XF86MonBrightnessUp>") 'increase-brightness)
-                          (exwm-input-set-key (kbd "<XF86MonBrightnessDown>") 'decrease-brightness)
+		  ;; Toggle floating windows
+		  ([?\s-t] . exwm-floating-toggle-floating)
 
-                 	 (exwm-input-set-key (kbd "<print>") 'flameshot)
-                          ;; Bind keys for volume control
-                          (exwm-input-set-key (kbd "<XF86AudioRaiseVolume>") 'increase-volume)
-                          (exwm-input-set-key (kbd "<XF86AudioLowerVolume>") 'decrease-volume)
-                          (exwm-input-set-key (kbd "<XF86AudioMute>") 'toggle-volume)
+		  ;; Toggle fullscreen
+		  ([?\s-f] . exwm-layout-toggle-fullscreen)
+
+		  ;; Toggle modeline
+		  ([?\s-m] . exwm-layout-toggle-mode-line)
+
+		  ;; Quit current buffer
+		  ([?\s-q] . kill-current-buffer)
+		  ([?\s-Q] . evil-window-delete)
+
+          ;; Launch applications via shell command
+		  ([?\s-d] . counsel-linux-app)
+		  ([?\s-a] . counsel-switch-buffer)
+                              
+                                   ,@(mapcar (lambda (i)
+                                               `(,(kbd (format "s-%d" i)) .
+                                                 (lambda ()
+                                                   (interactive)
+                                                   (exwm-workspace-switch-create ,i))))
+                                             (number-sequence 0 9))
+
+        			       ,@(cl-mapcar (lambda (c n)
+                                 `(,(kbd (format "s-%c" c)) .
+                                   (lambda ()
+                                     (interactive)
+                                     (exwm-workspace-move-window ,n)
+                                     (exwm-workspace-switch ,n))))
+                               '(?\) ?! ?@ ?# ?$ ?% ?^ ?& ?* ?\()
+                               ;; '(?\= ?! ?\" ?# ?¤ ?% ?& ?/ ?\( ?\))
+                               (number-sequence 0 9))
+
+        			     )))
+                         (unless (get 'exwm-input-simulation-keys 'saved-value)
+                           (setq exwm-input-simulation-keys
+                                 '(([?\C-b] . [left])
+                                   ([?\C-f] . [right])
+                                   ([?\C-p] . [up])
+    			       ([?\C-s] . ?\C-f)
+                                   ([?\C-n] . [down])
+                                   ([?\C-a] . [home])
+                                   ([?\C-e] . [end])
+                                   ([?\M-v] . [prior])
+                     	      
+                                   ([?\C-v] . [next])
+                     		  ([?\C-y] . ?\C-v)
+                     		  ([?\M-w] . ?\C-c)
+                     		  ([?\M-a] . ?\C-a)
+                                   ([?\C-d] . [delete])
+                                   ([?\C-k] . [S-end delete])
+
+        )))
+                         
+                            ;; Bind keys for brightness control
+                            (exwm-input-set-key (kbd "<XF86MonBrightnessUp>") 'increase-brightness)
+                            (exwm-input-set-key (kbd "<XF86MonBrightnessDown>") 'decrease-brightness)
+
+                   	 (exwm-input-set-key (kbd "<print>") 'flameshot)
+                            ;; Bind keys for volume control
+                            (exwm-input-set-key (kbd "<XF86AudioRaiseVolume>") 'increase-volume)
+                            (exwm-input-set-key (kbd "<XF86AudioLowerVolume>") 'decrease-volume)
+                            (exwm-input-set-key (kbd "<XF86AudioMute>") 'toggle-volume)
   #+END_SRC
   Modeline Shows in exwm windows
   #+BEGIN_SRC emacs-lisp
