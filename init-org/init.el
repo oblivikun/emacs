@@ -77,39 +77,53 @@
 (setq browse-url-browser-function 'eww-browse-url)
 
 ;; Record the start time and garbage collections
-(defvar efs/startup-time nil "Variable to store Emacs startup time.")
-(defvar efs/gcs-done nil "Variable to store the number of garbage collections done during startup.")
+   (defvar efs/startup-time nil "Variable to store Emacs startup time.")
+   (defvar efs/gcs-done nil "Variable to store the number of garbage collections done during startup.")
 
-(defun efs/display-startup-time ()
- "Calculate and store Emacs startup time and garbage collections."
- (setq efs/startup-time (format "%.2f seconds"
-                                 (float-time
-                                 (time-subtract after-init-time before-init-time))))
- (setq efs/gcs-done gcs-done))
+   (defun efs/display-startup-time ()
+    "Calculate and store Emacs startup time and garbage collections."
+    (setq efs/startup-time (format "%.2f seconds"
+                                    (float-time
+                                    (time-subtract after-init-time before-init-time))))
+    (setq efs/gcs-done gcs-done))
 
-(add-hook 'after-init-hook 'efs/display-startup-time)
+   (add-hook 'after-init-hook 'efs/display-startup-time)
 
-;; Define your dashboard function
-(defun my-dashboard ()
- "Display a simple Emacs dashboard."
- (interactive)
- (switch-to-buffer "*My Dashboard*")
- (erase-buffer)
- ;; Add your dashboard content here
- (insert "Welcome to My Emacs Dashboard!\n\n")
- ;; Display startup time and garbage collections
- (when efs/startup-time
-    (insert (format "Emacs loaded in %s with %d garbage collections.\n"
-                    efs/startup-time efs/gcs-done)))
- ;; Example: List recent files
- (insert "Recent Files:\n")
- (dolist (file (recentf-list))
-    (insert (concat "- " file "\n")))
- ;; Add more sections as needed
- )
+   (add-hook 'server-after-make-frame-hook 'efs/display-startup-time)
+   ;; Define your dashboard function
+   (defun my-dashboard ()
+    "Display a simple Emacs dashboard."
+    (interactive)
+    (switch-to-buffer "*My Dashboard*")
+    (erase-buffer)
+    
+    ;; Add your dashboard content here
+    (insert "Welcome to My Emacs Dashboard!\n\n")
+    ;; Display startup time and garbage collections
+    (when efs/startup-time
+       (insert (format "Emacs loaded in %s with %d garbage collections.\n"
+                       efs/startup-time efs/gcs-done)))
+    ;; Example: List recent files
+ (insert "Files in Current Directory:\n")
+(dolist (file (directory-files default-directory))
+   (unless (or (string= file ".") (string= file ".."))
+     (let ((start (point)))
+       (insert (concat "- " file "\n"))
+       ;; Make the file name clickable to open it in a new buffer
+       (make-text-button start (point)
+                         'action (lambda (button)
+                                  (find-file (button-get button 'file)))
+                         'follow-link t
+                         'file file))))
+  (goto-char (point-min))
+  ;; Add more sections as needed
+  )
 
-;; Ensure the dashboard is displayed at startup
-(add-hook 'emacs-startup-hook 'my-dashboard)
+   ;; Ensure the dashboard is displayed at startup
+   (add-hook 'emacs-startup-hook 'my-dashboard)
+   
+ ;; Use server-after-make-frame-hook instead of emacs-startup-hook
+ (add-hook 'server-after-make-frame-hook 'my-dashboard)
 
 (add-hook 'emacs-startup-hook 'my-dashboard)
 
