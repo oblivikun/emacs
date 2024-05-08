@@ -30,7 +30,11 @@ and do more performance tweaks. - moved to early-init.el
                   inhibit-message nil)
     (redraw-frame))
   (add-hook 'after-init-hook #'doom--reset-inhibited-vars-h)
-
+	  (use-package gcmh
+		    :straight t
+		    :defer 1
+  			:config
+  		  (gcmh-mode 1))
 
       #+END_SRC
 *** Startup hook
@@ -40,29 +44,22 @@ This turns on gcmh, tells us our startup time and turns on ivy - moved to early-
 #+END_SRC
 **** Small configurations to make emacs bearable
 #+BEGIN_SRC emacs-lisp
-        (defun efs/display-startup-time ()
-          (message "Emacs loaded in %s with %d garbage collections."
-      	       (format "%.2f seconds"
-      		       (float-time
-      		       (time-subtract after-init-time before-init-time)))
-      	       gcs-done))
-    (defun gc-restore ()
-      (setq gc-cons-threshold 12000000))
-         (add-hook 'emacs-startup-hook #'gc-restore)
-        (add-hook 'emacs-startup-hook #'efs/display-startup-time)
-          (setq inhibit-startup-message t)
-      (use-package straight
-        :custom
-        
-    (setq straight-check-for-modifications 'live-with-find)
 
-        (straight-use-package-by-default t))
-          (add-hook 'prog-mode-hook 'display-line-numbers-mode)
-  
-(setq display-line-numbers-type 'relative)
+
+
+            (setq inhibit-startup-message t)
+        (use-package straight
+          :custom
+          
+      (setq straight-check-for-modifications 'live-with-find)
+
+          (straight-use-package-by-default t))
+            (add-hook 'prog-mode-hook 'display-line-numbers-mode)
     
+  (setq display-line-numbers-type 'relative)
+      
 
-  (setq org-startup-indented t)
+    (setq org-startup-indented t)
 
 #+END_SRC
 
@@ -126,31 +123,50 @@ Some eww stuff(very gross)
 
 Dashboard - Custom logo for it, use nerd icons
 #+BEGIN_SRC emacs-lisp
-  (use-package dashboard
-    :defer nil
-  :config
-     (dashboard-setup-startup-hook)
-     ;; Set the title
-     (setq dashboard-banner-logo-title "Oblivikun Emacs")
-     ;; Set the banner
-     (setq dashboard-startup-banner 'official)
+;; Record the start time and garbage collections
+(defvar efs/startup-time nil "Variable to store Emacs startup time.")
+(defvar efs/gcs-done nil "Variable to store the number of garbage collections done during startup.")
 
-     (setq dashboard-center-content t)
-    (setq dashboard-display-icons-p t)     ; display icons on both GUI and terminal
-    (setq dashboard-icon-type 'nerd-icons) ; use `nerd-icons' package
-     ;; vertically center content
-     ; use `nerd-icons' package
-    (setq dashboard-filter-agenda-entry 'dashboard-no-filter-agenda)
+(defun efs/display-startup-time ()
+ "Calculate and store Emacs startup time and garbage collections."
+ (setq efs/startup-time (format "%.2f seconds"
+                                 (float-time
+                                 (time-subtract after-init-time before-init-time))))
+ (setq efs/gcs-done gcs-done))
+
+(add-hook 'after-init-hook 'efs/display-startup-time)
+
+;; Define your dashboard function
+(defun my-dashboard ()
+ "Display a simple Emacs dashboard."
+ (interactive)
+ (switch-to-buffer "*My Dashboard*")
+ (erase-buffer)
+ ;; Add your dashboard content here
+ (insert "Welcome to My Emacs Dashboard!\n\n")
+ ;; Display startup time and garbage collections
+ (when efs/startup-time
+    (insert (format "Emacs loaded in %s with %d garbage collections.\n"
+                    efs/startup-time efs/gcs-done)))
+ ;; Example: List recent files
+ (insert "Recent Files:\n")
+ (dolist (file (recentf-list))
+    (insert (concat "- " file "\n")))
+ ;; Add more sections as needed
+ )
+
+;; Ensure the dashboard is displayed at startup
+(add-hook 'emacs-startup-hook 'my-dashboard)
 #+END_SRC
 Make the dashboard load when i start the daemon
 #+BEGIN_SRC emacs-lisp
-  (setq initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
-   (setq dashboard-vertically-center-content t))
+
+  (add-hook 'emacs-startup-hook 'my-dashboard)
 #+END_SRC
 Hydra So i can remember my keybinds
 #+BEGIN_SRC emacs-lisp
   (use-package hydra
-    :defer 10
+    :defer 20
     )
  #+END_SRC
 modeline
@@ -207,7 +223,7 @@ modeline
 Company for auto completions. I really like this package :)
 #+BEGIN_SRC emacs-lisp
 (use-package company
- :defer t
+ :defer 10
  :hook (prog-mode . company-mode)
  :config
  (setq-default
@@ -901,7 +917,7 @@ load auctex
 #+BEGIN_SRC emacs-lisp
     (use-package auctex
     
-  :defer t
+  :hook (latex-mode . LaTeX-mode-hook)
   #+END_SRC
 Disable display of compilation log and add makeglossaries to the tex command for easy managament of glossaries
 #+BEGIN_SRC emacs-lisp
@@ -1113,12 +1129,12 @@ Another hydra for message-mode
 **** Projectile because i absoloutely love this :D
 #+BEGIN_SRC emacs-lisp
 
-(use-package projectile
-  :init
-  (projectile-mode +1)
-  :bind (:map projectile-mode-map
-              ("s-p" . projectile-command-map)
-              ("C-c p" . projectile-command-map)))
+  (use-package projectile
+    :defer 10
+   :hook (prog-mode . projectile-mode)
+    :bind (:map projectile-mode-map
+                ("s-p" . projectile-command-map)
+                ("C-c p" . projectile-command-map)))
 
 #+END_SRC
  Custom function to select line and temporarily enable delete-selection
@@ -1259,7 +1275,7 @@ Guru mode because i have bad habits
      )
 
     (use-package lsp-haskell
-
+:defer 10
      )
 
     (use-package haskell-mode

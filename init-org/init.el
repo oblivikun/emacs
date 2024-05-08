@@ -16,20 +16,15 @@
                 inhibit-message nil)
   (redraw-frame))
 (add-hook 'after-init-hook #'doom--reset-inhibited-vars-h)
+	  (use-package gcmh
+		    :straight t
+		    :defer 1
+			:config
+		  (gcmh-mode 1))
 
 
 
-(defun efs/display-startup-time ()
-          (message "Emacs loaded in %s with %d garbage collections."
-      	       (format "%.2f seconds"
-      		       (float-time
-      		       (time-subtract after-init-time before-init-time)))
-      	       gcs-done))
-    (defun gc-restore ()
-      (setq gc-cons-threshold 12000000))
-         (add-hook 'emacs-startup-hook #'gc-restore)
-        (add-hook 'emacs-startup-hook #'efs/display-startup-time)
-          (setq inhibit-startup-message t)
+(setq inhibit-startup-message t)
       (use-package straight
         :custom
         
@@ -81,27 +76,45 @@
       browse-url-secondary-browser-function 'browse-url-firefox)
 (setq browse-url-browser-function 'eww-browse-url)
 
-(use-package dashboard
-  :defer nil
-:config
-   (dashboard-setup-startup-hook)
-   ;; Set the title
-   (setq dashboard-banner-logo-title "Oblivikun Emacs")
-   ;; Set the banner
-   (setq dashboard-startup-banner 'official)
+;; Record the start time and garbage collections
+(defvar efs/startup-time nil "Variable to store Emacs startup time.")
+(defvar efs/gcs-done nil "Variable to store the number of garbage collections done during startup.")
 
-   (setq dashboard-center-content t)
-  (setq dashboard-display-icons-p t)     ; display icons on both GUI and terminal
-  (setq dashboard-icon-type 'nerd-icons) ; use `nerd-icons' package
-   ;; vertically center content
-   ; use `nerd-icons' package
-  (setq dashboard-filter-agenda-entry 'dashboard-no-filter-agenda)
+(defun efs/display-startup-time ()
+ "Calculate and store Emacs startup time and garbage collections."
+ (setq efs/startup-time (format "%.2f seconds"
+                                 (float-time
+                                 (time-subtract after-init-time before-init-time))))
+ (setq efs/gcs-done gcs-done))
 
-(setq initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
- (setq dashboard-vertically-center-content t))
+(add-hook 'after-init-hook 'efs/display-startup-time)
+
+;; Define your dashboard function
+(defun my-dashboard ()
+ "Display a simple Emacs dashboard."
+ (interactive)
+ (switch-to-buffer "*My Dashboard*")
+ (erase-buffer)
+ ;; Add your dashboard content here
+ (insert "Welcome to My Emacs Dashboard!\n\n")
+ ;; Display startup time and garbage collections
+ (when efs/startup-time
+    (insert (format "Emacs loaded in %s with %d garbage collections.\n"
+                    efs/startup-time efs/gcs-done)))
+ ;; Example: List recent files
+ (insert "Recent Files:\n")
+ (dolist (file (recentf-list))
+    (insert (concat "- " file "\n")))
+ ;; Add more sections as needed
+ )
+
+;; Ensure the dashboard is displayed at startup
+(add-hook 'emacs-startup-hook 'my-dashboard)
+
+(add-hook 'emacs-startup-hook 'my-dashboard)
 
 (use-package hydra
-  :defer 10
+  :defer 20
   )
 
 (setq mode-line-end-spaces
@@ -154,7 +167,7 @@
        (setq-default mode-line-format nil)
 
 (use-package company
- :defer t
+ :defer 10
  :hook (prog-mode . company-mode)
  :config
  (setq-default
@@ -718,7 +731,7 @@ Defaults to Sly because it has better integration with Nyxt."
 
 (use-package auctex
   
-:defer t
+:hook (latex-mode . LaTeX-mode-hook)
 
 :config
 (setq TeX-show-compilation nil)
@@ -891,8 +904,8 @@ Defaults to Sly because it has better integration with Nyxt."
 (add-hook 'message-mode-hook 'message-mode-hook-hydra-setup)
 
 (use-package projectile
-  :init
-  (projectile-mode +1)
+  :defer 10
+ :hook (prog-mode . projectile-mode)
   :bind (:map projectile-mode-map
               ("s-p" . projectile-command-map)
               ("C-c p" . projectile-command-map)))
@@ -994,31 +1007,31 @@ Defaults to Sly because it has better integration with Nyxt."
 (guru-global-mode +1))
 
 (use-package auto-compile
-      :config
-      (auto-compile-on-load-mode)
-(auto-compile-on-save-mode)
-    )
-    (use-package company-quickhelp
-      :hook (company-mode . company-quickhelp-mode))
-  (use-package go-mode
-   :magic ("\\.go\\'" . (lambda () (go-mode 1)))
-   :config
-   ;; Additional configuration for go-mode can go here
-   )
+        :config
+        (auto-compile-on-load-mode)
+  (auto-compile-on-save-mode)
+      )
+      (use-package company-quickhelp
+        :hook (company-mode . company-quickhelp-mode))
+    (use-package go-mode
+     :magic ("\\.go\\'" . (lambda () (go-mode 1)))
+     :config
+     ;; Additional configuration for go-mode can go here
+     )
 
-  (use-package lsp-haskell
+    (use-package lsp-haskell
+:defer 10
+     )
 
-   )
-
-  (use-package haskell-mode
-   :magic ("\\.hs\\'" . (lambda () (haskell-mode 1)))
-   :config
-   ;; Additional configuration for haskell-mode can go here
-   )
-    (global-set-key (kbd "S-C-<left>") 'shrink-window-horizontally)
-  (global-set-key (kbd "S-C-<right>") 'enlarge-window-horizontally)
-  (global-set-key (kbd "S-C-<down>") 'shrink-window)
-  (global-set-key (kbd "S-C-<up>") 'enlarge-window)
+    (use-package haskell-mode
+     :magic ("\\.hs\\'" . (lambda () (haskell-mode 1)))
+     :config
+     ;; Additional configuration for haskell-mode can go here
+     )
+      (global-set-key (kbd "S-C-<left>") 'shrink-window-horizontally)
+    (global-set-key (kbd "S-C-<right>") 'enlarge-window-horizontally)
+    (global-set-key (kbd "S-C-<down>") 'shrink-window)
+    (global-set-key (kbd "S-C-<up>") 'enlarge-window)
 
 (use-package god-mode
  :commands god-mode-all

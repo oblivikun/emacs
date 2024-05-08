@@ -15,18 +15,10 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 (use-package org
-  :defer 4
+  :commands (org-mode)
   :straight t)
 
-(add-hook 'emacs-startup-hook
-  	     
-  		(lambda ()
-  		  (use-package gcmh
-		    :straight t
-			 :defer 0.4
-  			:config
-  		  (gcmh-mode 1))
-  		       )    )
+
 
 ;; (defvar bootstrap-version)
 ;; (let ((bootstrap-file

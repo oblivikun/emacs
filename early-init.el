@@ -41,7 +41,7 @@
     ;;                inhibit-message t)
         (put 'site-run-file 'initial-value site-run-file))
       (setq site-run-file nil)
-;;(setq byte-compile-warnings '(not free-vars unresolved noruntime lexical make-local))
+(setq byte-compile-warnings '(not free-vars unresolved noruntime lexical make-local))
 
 ;; use proper .cache folder for eln-cache
  (setq package-user-dir (string-replace ".config" ".cache" package-user-dir))
