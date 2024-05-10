@@ -76,54 +76,83 @@
       browse-url-secondary-browser-function 'browse-url-firefox)
 (setq browse-url-browser-function 'eww-browse-url)
 
-;; Record the start time and garbage collections
-   (defvar efs/startup-time nil "Variable to store Emacs startup time.")
-   (defvar efs/gcs-done nil "Variable to store the number of garbage collections done during startup.")
+(defun display-files-in-grid ()
+   "Display files in a grid."
+   (let* ((files (directory-files default-directory))
+           (max-file-length (apply 'max (mapcar 'length files)))
+           (window-width (window-width))
+           (num-columns (max 1 (/ window-width (1+ max-file-length))))
+           (num-rows (ceiling (/ (length files) num-columns)))
+           (current-row 0)
+           (current-column 0))
+      (dolist (file files)
+        (unless (or (string= file ".") (string= file ".."))
+          (let ((start (point)))
+            (insert (concat "- " file))
+            ;; Make the file name clickable to open it in a new buffer
+            (make-text-button start (point)
+                              'action (lambda (button)
+                                       (find-file (button-get button 'file)))
+                              'follow-link t
+                              'file file)
+            ;; Calculate the position for the next file name
+            (setq current-column (1+ current-column))
+            (if (>= current-column num-columns)
+                (progn
+                  (setq current-column 0)
+                  (setq current-row (1+ current-row)))
+              ;; Insert a space between file names
+              (insert " "))
+            ;; Insert a newline character at the end of each row
+            (when (and (= current-column 0) (< current-row (1- num-rows)))
+              (insert "\n")))))))
+       ;; Record the start time and garbage collections
+       (defvar efs/startup-time nil "Variable to store Emacs startup time.")
+       (defvar efs/gcs-done nil "Variable to store the number of garbage collections done during startup.")
 
-   (defun efs/display-startup-time ()
-    "Calculate and store Emacs startup time and garbage collections."
-    (setq efs/startup-time (format "%.2f seconds"
-                                    (float-time
-                                    (time-subtract after-init-time before-init-time))))
-    (setq efs/gcs-done gcs-done))
+       (defun efs/display-startup-time ()
+        "Calculate and store Emacs startup time and garbage collections."
+        (setq efs/startup-time (format "%.2f seconds"
+                                        (float-time
+                                        (time-subtract after-init-time before-init-time))))
+        (setq efs/gcs-done gcs-done))
 
-   (add-hook 'after-init-hook 'efs/display-startup-time)
+       (add-hook 'after-init-hook 'efs/display-startup-time)
 
-   (add-hook 'server-after-make-frame-hook 'efs/display-startup-time)
-   ;; Define your dashboard function
-   (defun my-dashboard ()
-    "Display a simple Emacs dashboard."
-    (interactive)
-    (switch-to-buffer "*My Dashboard*")
-    (erase-buffer)
-    
-    ;; Add your dashboard content here
-    (insert "Welcome to My Emacs Dashboard!\n\n")
-    ;; Display startup time and garbage collections
-    (when efs/startup-time
-       (insert (format "Emacs loaded in %s with %d garbage collections.\n"
-                       efs/startup-time efs/gcs-done)))
-    ;; Example: List recent files
- (insert "Files in Current Directory:\n")
-(dolist (file (directory-files default-directory))
-   (unless (or (string= file ".") (string= file ".."))
-     (let ((start (point)))
-       (insert (concat "- " file "\n"))
-       ;; Make the file name clickable to open it in a new buffer
-       (make-text-button start (point)
-                         'action (lambda (button)
-                                  (find-file (button-get button 'file)))
-                         'follow-link t
-                         'file file))))
-  (goto-char (point-min))
-  ;; Add more sections as needed
-  )
+       (add-hook 'server-after-make-frame-hook 'efs/display-startup-time)
+       ;; Define your dashboard function
+       (defun my-dashboard ()
+        "Display a simple Emacs dashboard."
+        (interactive)
+        (switch-to-buffer "*My Dashboard*")
+        (erase-buffer)
+        
+        ;; Add your dashboard content here
+        
+ (insert (propertize "Welcome to My Emacs Dashboard!\n\n"
+                          'face '(:height 1.5 :foreground "blue")))
+        ;; Display startup time and garbage collections
+  (when efs/startup-time
+     (insert (propertize (format "Emacs loaded in %s with %d garbage collections.\n \n"
+                                   efs/startup-time efs/gcs-done)
+                             'face '(:height 1.2 :foreground "green"))))
+        ;; Example: List recent files
+  
+(insert (propertize "Files in Current Directory:\n"
+                         'face '(:foreground "red")))
+  (display-files-in-grid)
+      (goto-char (point-min))
+      
 
-   ;; Ensure the dashboard is displayed at startup
-   (add-hook 'emacs-startup-hook 'my-dashboard)
-   
- ;; Use server-after-make-frame-hook instead of emacs-startup-hook
- (add-hook 'server-after-make-frame-hook 'my-dashboard)
+
+      ;; Add more sections as needed
+      )
+
+       ;; Ensure the dashboard is displayed at startup
+       (add-hook 'emacs-startup-hook 'my-dashboard)
+       
+     ;; Use server-after-make-frame-hook instead of emacs-startup-hook
+     (add-hook 'server-after-make-frame-hook 'my-dashboard)
 
 (add-hook 'emacs-startup-hook 'my-dashboard)
 
@@ -1048,16 +1077,16 @@ Defaults to Sly because it has better integration with Nyxt."
     (global-set-key (kbd "S-C-<up>") 'enlarge-window)
 
 (use-package god-mode
- :commands god-mode-all
+ :commands god-local-mode
  :config
  ;; Set the key to toggle God Mode globally
- (global-set-key (kbd "<escape>") #'god-mode-all)
+ (global-set-key (kbd "<escape>") #'god-local-mode)
  ;; Ensure no buffers are exempt from God Mode
  (setq god-exempt-major-modes nil)
  (setq god-exempt-predicates nil)
  ;; Disable function key translation if desired
  ;; (setq god-mode-enable-function-key-translation nil)
-  :hook ((prog-mode . god-mode-all)
-      (text-mode . god-mode-all)))
+  :hook ((prog-mode . god-local-mode)
+      (text-mode . god-local-mode)))
 
 ;; Function to activate God Mode after exiting Dashboard mode
