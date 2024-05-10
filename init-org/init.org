@@ -1261,16 +1261,16 @@ Guru mode because i have bad habits
                       :demand t
                       :config
   		    #+END_SRC
-		    Brightness control using lux, [[https://github.com/Ventto/lux]]
+		    Brightness control using brightnessctl
 		    #+BEGIN_SRC emacs-lisp
 
 		       (defun increase-brightness ()
 		          (interactive)
-		          (shell-command "lux -a 10%"))
+		          (shell-command "brightnessctl set 10%+"))
 
 		      (defun decrease-brightness ()
 		        (interactive)
-		        (shell-command "lux -s 10%"))
+		        (shell-command "brightnessctl set 10%-"))
 
 		     #+END_SRC
 		     Screenshots with flameshot
@@ -1437,4 +1437,13 @@ Prefix keys
                           (setq exwm-systemtray-height 16)
                           (exwm-enable)
                      	 )
+#+END_SRC
+NIX mode because i use nixos btw
+#+BEGIN_SRC emacs-lisp
+
+
+(use-package nix-mode
+  :mode "\\.nix\\'")
+
+
 #+END_SRC

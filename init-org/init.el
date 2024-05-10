@@ -1013,11 +1013,11 @@ Defaults to Sly because it has better integration with Nyxt."
 
 (defun increase-brightness ()
     (interactive)
-    (shell-command "lux -a 10%"))
+    (shell-command "brightnessctl set 10%+"))
 
 (defun decrease-brightness ()
   (interactive)
-  (shell-command "lux -s 10%"))
+  (shell-command "brightnessctl set 10%-"))
 
 (defun flameshot ()
   (interactive)
