@@ -1021,29 +1021,9 @@ Defaults to Sly because it has better integration with Nyxt."
 
 (setq TeX-show-compilation nil)
 
-(use-package solarized-theme
-  :defer 10
+(use-package gruvbox-theme
   )
-(defun switch-theme-based-on-time ()
-  (interactive)
-  (let ((current-hour (string-to-number (format-time-string "%H"))))
-    (cond ((and (>= current-hour 20) (<= current-hour 23))
-           (disable-theme t)
-	   (message "switch")
-           (load-theme 'solarized-selenized-dark  ))
-          ((and (>= current-hour 9) (<= current-hour 19))
-	   (disable-theme t)
-	   (message "switch")
-           (load-theme 'solarized-selenized-light ))
-          ;; Removed the condition for 8 AM to 9 AM
-          (t ;; This is the else clause
-           (disable-theme t)
-	   (message "switch")
-           (load-theme 'solarized-selenized-black )))) ;; Load the default theme if none of the conditions are met
-  )
-
-    ;; Schedule the theme switch function to run every hour
-    (run-at-time "00:00" (* 30 60) 'switch-theme-based-on-time)
+(load-theme 'gruvbox-dark-hard t)
 
 (use-package guru-mode
 :init
@@ -1090,3 +1070,6 @@ Defaults to Sly because it has better integration with Nyxt."
       (text-mode . god-local-mode)))
 
 ;; Function to activate God Mode after exiting Dashboard mode
+
+(use-package nix-mode
+  :mode "\\.nix\\'")
