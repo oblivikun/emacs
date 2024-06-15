@@ -28,7 +28,7 @@
       (use-package straight
         :custom
         
-    (setq straight-check-for-modifications 'live-with-find)
+    (setq straight-check-for-modification 'check-on-save find-when-checking)
 
         (straight-use-package-by-default t))
           (add-hook 'prog-mode-hook 'display-line-numbers-mode)
@@ -153,8 +153,6 @@
        
      ;; Use server-after-make-frame-hook instead of emacs-startup-hook
      (add-hook 'server-after-make-frame-hook 'my-dashboard)
-
-(add-hook 'emacs-startup-hook 'my-dashboard)
 
 (use-package hydra
   :defer 20
@@ -570,9 +568,6 @@ Defaults to Sly because it has better integration with Nyxt."
  :hook (lsp-mode . lsp-ui-mode))
 
 ;; if you are ivy user
-(use-package lsp-ivy
-  :defer 12
-  :commands lsp-ivy-workspace-symbol)
 
 ;; (add-hook 'prog-mode-hook #'eglot-ensure)
 ;; (with-eval-after-load 'eglot
@@ -962,31 +957,62 @@ Defaults to Sly because it has better integration with Nyxt."
     (setq delete-selection-mode nil))) 
 (global-set-key (kbd "C-c l") 'select-line)
 
-(use-package ivy
-      :commands (counsel M-x counsel-git counsel-ag counsel-locate counsel-minibuffer-history counsel-describe-variable counsel-find-library counsel-unicode-char)
+(setq user-vertico t) 
+(setq user-ivy nil)
+        (use-package vertico
+    :if user-vertico
+          :ensure t
+          :bind (:map vertico-map
+                 ("C-j" . vertico-next)
+                 ("C-k" . vertico-previous)
+                 ("C-f" . vertico-exit)
+                 :map minibuffer-local-map
+                 ("M-h" . backward-kill-word))
+          :custom
+          (vertico-cycle t)
+          :init
+          (vertico-mode))
+
+        (use-package savehist
+          :init
+          (savehist-mode))
+
+        (use-package marginalia
+          :after vertico
+          :if user-vertico
+          :ensure t
+          :custom
+          (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
+          :init
+          (marginalia-mode))
+    
+             (use-package ivy
+	       :if user-ivy
+   :commands (counsel M-x counsel-git counsel-ag counsel-locate counsel-minibuffer-history counsel-describe-variable counsel-find-library counsel-unicode-char)
    :init
    (ivy-mode 1)
-   :config
-   (setq ivy-use-virtual-buffers t)
-   (setq enable-recursive-minibuffers t))
+    :config
+ (setq ivy-use-virtual-buffers t)
+    (setq enable-recursive-minibuffers t))
 
-(use-package counsel
- :commands (counsel M-x counsel-git counsel-ag counsel-locate counsel-minibuffer-history counsel-describe-variable counsel-find-library counsel-unicode-char)
- :bind (("M-x" . counsel-M-x)
-         ("<f1> f" . counsel-describe-function)
-         ("<f1> v" . counsel-describe-variable)
-         ("<f1> o" . counsel-describe-symbol)
-         ("<f1> l" . counsel-find-library)
-         ("<f2> i" . counsel-info-lookup-symbol)
-         ("<f2> u" . counsel-unicode-char)
-         ("C-c g" . counsel-git)
+ (use-package counsel
+   :if user-ivy
+:commands (counsel M-x counsel-git counsel-ag counsel-locate counsel-minibuffer-history counsel-describe-variable counsel-find-library counsel-unicode-char)
+  :bind (("M-x" . counsel-M-x)
+                    ("<f1> f" . counsel-describe-function)
+                ("<f1> v" . counsel-describe-variable)
+          ("<f1> o" . counsel-describe-symbol)
+              ("<f1> l" . counsel-find-library)
+      ("<f2> i" . counsel-info-lookup-symbol)
+          ("<f2> u" . counsel-unicode-char)
+          ("C-c g" . counsel-git)
 	 ("C-x  C-f" . counsel-find-file)
-         ("C-c j" . counsel-git-grep)
-         ("C-c k" . counsel-ag)
+          ("C-c j" . counsel-git-grep)
+          ("C-c k" . counsel-ag)
          ("C-x l" . counsel-locate)
-         ("C-S-o" . counsel-rhythmbox)
-         :map minibuffer-local-map
-         ("C-r" . counsel-minibuffer-history)))
+          ("C-S-o" . counsel-rhythmbox)
+          :map minibuffer-local-map
+          ("C-r" . counsel-minibuffer-history)))
 
 (global-set-key (kbd "C-c <left>")  'windmove-left)
 (global-set-key (kbd "C-c <right>") 'windmove-right)
@@ -1021,9 +1047,28 @@ Defaults to Sly because it has better integration with Nyxt."
 
 (setq TeX-show-compilation nil)
 
-(use-package gruvbox-theme
+(use-package solarized-theme
+  :defer 10
   )
-(load-theme 'gruvbox-dark-hard t)
+
+(defun switch-theme-based-on-time ()
+  (interactive)
+  (let ((current-hour (string-to-number (format-time-string "%H"))))
+    (cond ((and (>= current-hour 20) (<= current-hour 23))
+           (disable-theme t)
+	   (message "switch")
+           (load-theme 'solarized-selenized-dark  ))
+          ((and (>= current-hour 9) (<= current-hour 19))
+	   (disable-theme t)
+	   (message "switch")
+           (load-theme 'solarized-dark-high-contrast ))
+          ;; Removed the condition for 8 AM to 9 AM
+          (t ;; This is the else clause
+           (disable-theme t)
+	   (message "switch")
+           (load-theme 'solarized-selenized-black ))))) ;; Load the default theme if none of the conditions are met
+
+    (run-at-time "00:00" (* 30 60) 'switch-theme-based-on-time)
 
 (use-package guru-mode
 :init
@@ -1057,19 +1102,20 @@ Defaults to Sly because it has better integration with Nyxt."
     (global-set-key (kbd "S-C-<up>") 'enlarge-window)
 
 (use-package god-mode
- :commands god-local-mode
- :config
- ;; Set the key to toggle God Mode globally
- (global-set-key (kbd "<escape>") #'god-local-mode)
- ;; Ensure no buffers are exempt from God Mode
- (setq god-exempt-major-modes nil)
- (setq god-exempt-predicates nil)
- ;; Disable function key translation if desired
- ;; (setq god-mode-enable-function-key-translation nil)
-  :hook ((prog-mode . god-local-mode)
-      (text-mode . god-local-mode)))
+   :commands god-mode-all
+   :init
+   (god-mode-all)
+   :config
+   ;; Set the key to toggle God Mode globally
+   (global-set-key (kbd "<escape>") #'god-mode-all)
+   ;; Ensure no buffers are exempt from God Mode
+   (setq god-exempt-major-modes nil)
+   (setq god-exempt-predicates nil)
+   ;; Disable function key translation if desired
+   ;; (setq god-mode-enable-function-key-translation nil)
+)
 
-;; Function to activate God Mode after exiting Dashboard mode
+  ;; Function to activate God Mode after exiting Dashboard mode
 
 (use-package nix-mode
   :mode "\\.nix\\'")
