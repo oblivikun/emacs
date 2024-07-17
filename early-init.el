@@ -3,7 +3,6 @@
   (setq initial-major-mode 'fundamental-mode)
   (setq initial-scratch-message 'nil)
   (setq custom-safe-themes t)
-
 (setq frame-inhibit-implied-resize t)
 (setq load-prefer-newer t)
 (setq load-prefer-newer noninteractive)

@@ -22,7 +22,11 @@
 			:config
 		  (gcmh-mode 1))
 
-
+(setq user-exwm t) 
+        (setq user-vertico t)
+(setq user-ivy nil)
+(setq user-dashboard nil)
+(setq cool-dashboard t)
 
 (setq inhibit-startup-message t)
       (use-package straight
@@ -121,38 +125,52 @@
 
        (add-hook 'server-after-make-frame-hook 'efs/display-startup-time)
        ;; Define your dashboard function
-       (defun my-dashboard ()
-        "Display a simple Emacs dashboard."
-        (interactive)
-        (switch-to-buffer "*My Dashboard*")
-        (erase-buffer)
-        
-        ;; Add your dashboard content here
-        
- (insert (propertize "Welcome to My Emacs Dashboard!\n\n"
-                          'face '(:height 1.5 :foreground "blue")))
-        ;; Display startup time and garbage collections
-  (when efs/startup-time
-     (insert (propertize (format "Emacs loaded in %s with %d garbage collections.\n \n"
-                                   efs/startup-time efs/gcs-done)
-                             'face '(:height 1.2 :foreground "green"))))
-        ;; Example: List recent files
+(defun my-dashboard ()
+  "Display a simple Emacs dashboard."
+  (interactive)
+  (switch-to-buffer "*My Dashboard*")
+  (erase-buffer)
   
-(insert (propertize "Files in Current Directory:\n"
-                         'face '(:foreground "red")))
-  (display-files-in-grid)
-      (goto-char (point-min))
-      
+  ;; Check if user-dashboard is set
+  (when (and (boundp 'user-dashboard) (not (eq user-dashboard nil)))
+    ;; Add your dashboard content here
+    (insert (propertize "Welcome to My Emacs Dashboard!\n\n"
+                        'face '(:height 1.5 :foreground "blue")))
+    
+    ;; Display startup time and garbage collections
+    (when efs/startup-time
+      (insert (propertize (format "Emacs loaded in %s with %d garbage collections.\n \n"
+                                    efs/startup-time efs/gcs-done)
+                          'face '(:height 1.2 :foreground "green"))))
+    
+    ;; Example: List recent files
+    (insert (propertize "Files in Current Directory:\n"
+                        'face '(:foreground "red")))
+    (display-files-in-grid)
+    (goto-char (point-min))))
 
+  ;; Ensure the dashboard is displayed at startup
+;; Check if user-dashboard is set
+(when (and (boundp 'user-dashboard) (not (eq user-dashboard nil)))
+  ;; Ensure the dashboard is displayed at startup
+  (add-hook 'emacs-startup-hook 'my-dashboard)
+  
+  ;; Use server-after-make-frame-hook instead of emacs-startup-hook
+  (add-hook 'server-after-make-frame-hook 'my-dashboard))
 
-      ;; Add more sections as needed
-      )
-
-       ;; Ensure the dashboard is displayed at startup
-       (add-hook 'emacs-startup-hook 'my-dashboard)
-       
-     ;; Use server-after-make-frame-hook instead of emacs-startup-hook
-     (add-hook 'server-after-make-frame-hook 'my-dashboard)
+(use-package dashboard
+  :if cool-dashboard
+  :preface
+  (defun my/dashboard-banner ()
+    "Set a dashboard banner including information on package initialization
+  time and garbage collections."""
+    (setq dashboard-banner-logo-title
+          (format "Emacs ready in %.2f seconds with %d garbage collections."
+                  (float-time (time-subtract after-init-time before-init-time)) gcs-done)))
+  :config
+  (dashboard-setup-startup-hook)
+  :hook ((after-init     . dashboard-refresh-buffer)
+         (dashboard-mode . my/dashboard-banner)))
 
 (use-package hydra
   :defer 20
@@ -204,8 +222,6 @@
    "Mode line construct to display the major mode.")
 
  (put 'my-modeline-major-mode 'risky-local-variable t)
-     (setq-default header-line-format mode-line-format)
-       (setq-default mode-line-format nil)
 
 (use-package company
  :defer 10
@@ -579,7 +595,7 @@ Defaults to Sly because it has better integration with Nyxt."
 (let ((height (window-body-height)))
   (split-window-below (- height (/ height 4)))) 
 (other-window 1)
-(term "ksh"))
+(term "sh"))
 
 (defun close-terminal-at-bottom ()
  (interactive)
@@ -778,8 +794,6 @@ Defaults to Sly because it has better integration with Nyxt."
 					 (latex-mode)
 					 :help "Run makeglossaries script, which will choose xindy or makeindex") t))
 
-(font-lock-add-keywords 'latex-mode (list (list "\\(«\\(.+?\\|\n\\)\\)\\(+?\\)\\(»\\)" '(1 'font-latex-string-face t) '(2 'font-latex-string-face t) '(3 'font-latex-string-face t))))
-
 :config
     (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
     (add-hook 'latex-mode-hook 'turn-on-reftex)
@@ -957,9 +971,7 @@ Defaults to Sly because it has better integration with Nyxt."
     (setq delete-selection-mode nil))) 
 (global-set-key (kbd "C-c l") 'select-line)
 
-(setq user-vertico t) 
-(setq user-ivy nil)
-        (use-package vertico
+(use-package vertico
     :if user-vertico
           :ensure t
           :bind (:map vertico-map
@@ -1018,6 +1030,10 @@ Defaults to Sly because it has better integration with Nyxt."
 (global-set-key (kbd "C-c <right>") 'windmove-right)
 (global-set-key (kbd "C-c <up>")    'windmove-up)
 (global-set-key (kbd "C-c <down>")  'windmove-down)
+(global-set-key (kbd "C-c C-<left>") 'windmove-swap-states-left) 
+(global-set-key (kbd "C-c C-<right>") 'windmove-swap-states-right)
+  (global-set-key (kbd "C-c C-<up>") 'windmove-swap-states-up)
+   (global-set-key (kbd "C-c C-<down>") 'windmove-swap-states-down)
 
 (use-package treemacs-nerd-icons
   :demand t
@@ -1057,11 +1073,11 @@ Defaults to Sly because it has better integration with Nyxt."
     (cond ((and (>= current-hour 20) (<= current-hour 23))
            (disable-theme t)
 	   (message "switch")
-           (load-theme 'solarized-selenized-dark  ))
+           (load-theme 'solarized-light-high-contrast  ))
           ((and (>= current-hour 9) (<= current-hour 19))
 	   (disable-theme t)
 	   (message "switch")
-           (load-theme 'solarized-dark-high-contrast ))
+           (load-theme 'solarized-selenized-white ))
           ;; Removed the condition for 8 AM to 9 AM
           (t ;; This is the else clause
            (disable-theme t)
@@ -1119,3 +1135,233 @@ Defaults to Sly because it has better integration with Nyxt."
 
 (use-package nix-mode
   :mode "\\.nix\\'")
+
+(use-package exheres-mode
+    :mode ("\\.exlib$" "\\.exheres-.*")
+  :straight (
+	     :files ("src/*")
+		:package "exheres-mode" :host nil :type git :repo "https://gitlab.exherbo.org/exherbo-misc/exheres-mode" ) 
+  :config
+  ;; Any additional configuration for Exheres mode goes here
+  )
+
+(defun insert-org-code-block-if-org-mode ()
+  "Insert an org-mode code block if in org-mode."
+  (interactive)
+  (when (eq major-mode 'org-mode)
+    (insert "#+BEGIN_SRC \n\n#+END_SRC")
+    (previous-line)))
+
+(defun setup-org-mode-shortcuts ()
+  "Set up custom shortcuts for org-mode."
+  (local-set-key (kbd "C-c b") 'insert-org-code-block-if-org-mode))
+
+(add-hook 'org-mode-hook 'setup-org-mode-shortcuts)
+
+(use-package exrandr
+  :commands (xrandr-interface)
+  :straight (:host gitlab :repo "oblivikun/emacs-xrandr"))
+
+(load-file (expand-file-name "personal.el" user-emacs-directory))
+
+(defun activate-conf-mode-for-linux-config ()
+    "Activate conf-mode if the file is under /usr/src/linux/*/.config"
+    (when (string-match-p "/usr/src/linux/[^/]*/\\.config$" buffer-file-name)
+      (kconfig-mode)))
+  (use-package kconfig-mode
+    :straight (:host github :repo "delaanthonio/kconfig-mode")
+    :init
+    
+(add-hook 'find-file-hook #'activate-conf-mode-for-linux-config)
+    ;; Define a function to activate kconfig-mode for .config files under /usr/src/linux
+
+    ;; (with-eval-after-load 'kconfig-mode
+    ;;   (add-hook 'find-file-hook #'activate-kconfig-mode-for-linux-config)
+
+
+  )
+
+(use-package exwm
+:demand t
+:if user-exwm
+:config
+
+(defun increase-brightness ()
+    (interactive)
+    (shell-command "lux -a 10%"))
+
+(defun decrease-brightness ()
+  (interactive)
+  (shell-command "lux -s 10%"))
+
+(defun flameshot ()
+  (interactive)
+  (shell-command "flameshot gui"))
+
+(defun increase-volume ()
+                         (interactive)
+                         (shell-command "pamixer --increase 5"))
+
+                      (defun decrease-volume ()
+                         (interactive)
+                         (shell-command "pamixer --decrease 5"))
+
+                      (defun toggle-volume ()
+                         (interactive)
+                         (shell-command "pamixer --toggle-mute"))
+
+
+
+(add-hook 'exwm-update-class-hook
+                             (lambda ()
+                               (exwm-workspace-rename-buffer exwm-class-name)))
+
+;; These keys should always pass through to Emacs
+(setq exwm-input-prefix-keys
+  '(?\C-x
+    ?\C-u
+    ?\C-h
+    ?\M-x
+    ?\M-`
+    ?\M-&
+    ?\M-:
+    ?\C-\ ))  ;; Ctrl+Space
+
+(define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
+
+(defhydra exwm-window-resize (:timeout 4)
+("<left>" (exwm-layout-shrink-window-horizontally 10) "shrink h")
+("<right>" (exwm-layout-enlarge-window-horizontally 10) "enlarge h")
+("<up>" (exwm-layout-shrink-window 10) "shrink v")
+("<down>" (exwm-layout-enlarge-window 10) "enlarge v")
+("q" nil "quit" :exit t))
+
+(use-package app-launcher
+  :straight '(app-launcher :host github :repo "SebastienWae/app-launcher"))
+
+(unless (get 'exwm-input-global-keys 'saved-value)
+                       (setq exwm-input-global-keys
+                             `(
+                               ([?\s-;] . exwm-reset)
+                               ([?\s-w] . exwm-workspace-switch)
+			                ([?\s-r] . exwm-window-resize/body)
+
+		  ;; Toggle floating windows
+		  ([?\s-t] . exwm-floating-toggle-floating)
+
+		  ;; Toggle fullscreen
+		  ([?\s-f] . exwm-layout-toggle-fullscreen)
+
+		  ;; Toggle modeline
+		  ([?\s-m] . exwm-layout-toggle-mode-line)
+
+		  ;; Quit current buffer
+		  ([?\s-q] . kill-current-buffer)
+
+      ;; Launch applications via shell command
+		  ([?\s-d] . app-launcher-run-app)
+		  ([?\s-a] . switch-to-buffer)
+                          
+                               ,@(mapcar (lambda (i)
+                                           `(,(kbd (format "s-%d" i)) .
+                                             (lambda ()
+                                               (interactive)
+                                               (exwm-workspace-switch-create ,i))))
+                                         (number-sequence 0 9))
+
+    			       ,@(cl-mapcar (lambda (c n)
+                             `(,(kbd (format "s-%c" c)) .
+                               (lambda ()
+                                 (interactive)
+                                 (exwm-workspace-move-window ,n)
+                                 (exwm-workspace-switch ,n))))
+                           '(?\) ?! ?@ ?# ?$ ?% ?^ ?& ?* ?\()
+                           ;; '(?\= ?! ?\" ?# ?¤ ?% ?& ?/ ?\( ?\))
+                           (number-sequence 0 9))
+
+    			     )))
+                     (unless (get 'exwm-input-simulation-keys 'saved-value)
+                       (setq exwm-input-simulation-keys
+                             '(([?\C-b] . [left])
+                               ([?\C-f] . [right])
+                               ([?\C-p] . [up])
+			       ([?\C-s] . ?\C-f)
+                               ([?\C-n] . [down])
+                               ([?\C-a] . [home])
+                               ([?\C-e] . [end])
+                               ([?\M-v] . [prior])
+                 	      
+                               ([?\C-v] . [next])
+                 		  ([?\C-y] . ?\C-v)
+                 		  ([?\M-w] . ?\C-c)
+                 		  ([?\M-a] . ?\C-a)
+                               ([?\C-d] . [delete])
+                               ([?\C-k] . [S-end delete])
+
+    )))
+                     
+                        ;; Bind keys for brightness control
+                        (exwm-input-set-key (kbd "<XF86MonBrightnessUp>") 'increase-brightness)
+                        (exwm-input-set-key (kbd "<XF86MonBrightnessDown>") 'decrease-brightness)
+
+               	 (exwm-input-set-key (kbd "<print>") 'flameshot)
+                        ;; Bind keys for volume control
+                        (exwm-input-set-key (kbd "<XF86AudioRaiseVolume>") 'increase-volume)
+                        (exwm-input-set-key (kbd "<XF86AudioLowerVolume>") 'decrease-volume)
+                        (exwm-input-set-key (kbd "<XF86AudioMute>") 'toggle-volume)
+
+(defun exwm-update-class ()
+                  (exwm-workspace-rename-buffer exwm-class-name))
+
+                (defun exwm-update-title ()
+                  (pcase exwm-class-name
+                    ("Firefox" (exwm-workspace-rename-buffer (format "Firefox: %s" exwm-title)))))
+                
+              (add-hook 'exwm-update-class-hook #'exwm-update-class)
+
+              ;; When window title updates, use it to set the buffer name
+              (add-hook 'exwm-update-title-hook #'exwm-update-title)
+(require 'exwm-randr)
+
+    (exwm-randr-enable)
+            (setq exwm-workspace-show-all-buffers t)
+        (setq exwm-randr-workspace-monitor-plist '(2 "eDP1" 3 "HDMI2"))
+
+    (defun run-in-background (command)
+      (let ((command-parts (split-string command "[ ]+")))
+        (apply #'call-process `(,(car command-parts) nil 0 nil ,@(cdr command-parts)))))
+
+    (defun set-wallpaper ()
+      (interactive)
+      ;; NOTE: You will need to update this to a valid background path!
+      (start-process-shell-command
+          "feh" nil  "feh --bg-tile ~/Pictures/wal2.png"))
+        (defun update-displays ()
+              (run-in-background "autorandr --change --force")
+              (set-wallpaper)
+              (message "Display config: %s"
+                       (string-trim (shell-command-to-string "autorandr --current"))))
+
+(use-package exwm-modeline
+      :after (exwm))
+    (add-hook 'exwm-init-hook #'exwm-modeline-mode)
+           (setq exwm-systemtray-height 16)
+    
+(setq mouse-autoselect-window t
+      focus-follows-mouse t)
+
+           (exwm-init))
+
+(defun my-get-volume-level ()
+  "Fetches the current volume level using pamixer."
+  (when (not (null user-exwm))
+    (shell-command-to-string "pamixer --get-volume-human")))
+
+(defun my-add-volume-indicator-to-mode-line ()
+  "Adds a volume indicator to the mode line if user-exwm is not nil."
+  (let ((volume-level (my-get-volume-level)))
+    (setq mode-line-format
+          (append mode-line-format
+                  (list (concat "  " volume-level))))))
+
+(my-add-volume-indicator-to-mode-line)

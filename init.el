@@ -1,3 +1,5 @@
+(set-frame-parameter nil 'alpha-background 98)
+(add-to-list 'default-frame-alist '(alpha-background . 98))
 
 (defvar bootstrap-version)
 (let ((bootstrap-file
