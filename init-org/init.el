@@ -1368,7 +1368,6 @@ Defaults to Sly because it has better integration with Nyxt."
 
 (my-add-volume-indicator-to-mode-line)
 
-;; Example configuration for Consult
 (use-package consult
 :if user-consult
   ;; Replace bindings. Lazily loaded by `use-package'.

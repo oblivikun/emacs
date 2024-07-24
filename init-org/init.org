@@ -38,7 +38,7 @@ and do more performance tweaks. - moved to early-init.el
 
       #+END_SRC
 *** Personal stuff
-config values
+**** config values
 #+BEGIN_SRC emacs-lisp
     (setq user-exwm t) 
             (setq user-vertico t)
@@ -70,31 +70,29 @@ config values
 
 #+END_SRC
 
-  This is for my shell config so it doesnt open GNU screen when im in emacs terminal.
+*****  This is for my shell config so it doesnt open GNU screen when im in emacs terminal.
   #+BEGIN_SRC emacs-lisp
   (setenv "IN_EMACS" "1")
 #+END_SRC
-Disable shift selection because i want to use emacs
+***** Disable shift selection because i want to use emacs
 #+BEGIN_SRC emacs-lisp
 (setq shift-select-mode nil)
 #+END_SRC emacs-lisp
 *** Packages
 **** Some notes
 Most of these are deffered to optimize startup time.
-**** The actual stuff
-Dirvish
+**** Dirvish
 #+BEGIN_SRC emacs-lisp
-     (use-package dirvish
-    :commands (dirvish) ;; Specify the command to load Dirvish
-    :config
-  (dirvish-override-dired-mode)
-  :bind
-  
- :bind (("C-x d" . dirvish-dispatch))
-    )
+         (use-package dirvish
+        :init
+      (dirvish-override-dired-mode)
+     :bind (("M-g d" . dirvish-dispatch)
+    	("C-x d" . dirvish )
+  	)
+        )
   #+END_SRC
   
-  Treemacs - File Tree i dont use that much, has some git stuff here.
+****  Treemacs - File Tree i dont use that much, has some git stuff here.
 #+BEGIN_SRC emacs-lisp :lexical t
   (use-package treemacs
     :commands (treemacs)
@@ -115,7 +113,7 @@ Dirvish
    (("M-0" . treemacs)))
 
 #+END_SRC
-Some eww stuff(very gross)
+**** Some eww stuff(very gross)
 
 #+BEGIN_SRC emacs-lisp
 (setq browse-url-browser-function 'eww-browse-url
@@ -128,7 +126,7 @@ Some eww stuff(very gross)
 (setq browse-url-browser-function 'eww-browse-url)
 #+END_SRC
 
-Dashboard - Custom logo for it, use nerd icons
+**** Dashboard - Custom logo for it, use nerd icons
 #+BEGIN_SRC emacs-lisp
     (defun display-files-in-grid ()
    "Display files in a grid."
@@ -209,7 +207,7 @@ Dashboard - Custom logo for it, use nerd icons
   (add-hook 'server-after-make-frame-hook 'my-dashboard))
 
 #+END_SRC
-The other dashboard
+**** The other dashboard
 #+BEGIN_SRC emacs-lisp
   
   (use-package dashboard
@@ -226,13 +224,13 @@ The other dashboard
     :hook ((after-init     . dashboard-refresh-buffer)
            (dashboard-mode . my/dashboard-banner)))
 #+END_SRC
-Hydra So i can remember my keybinds
+**** Hydra So i can remember my keybinds
 #+BEGIN_SRC emacs-lisp
   (use-package hydra
     :defer 20
     )
  #+END_SRC
-modeline
+**** Modeline
 #+BEGIN_SRC emacs-lisp
        (setq mode-line-end-spaces
            '(""
@@ -281,7 +279,7 @@ modeline
 
    (put 'my-modeline-major-mode 'risky-local-variable t)
 #+END_SRC
-Company for auto completions. I really like this package :)
+**** Company for auto completions. I really like this package :)
 #+BEGIN_SRC emacs-lisp
 (use-package company
  :defer 10
@@ -294,7 +292,7 @@ Company for auto completions. I really like this package :)
     company-frontends '(company-pseudo-tooltip-frontend company-preview-frontend)))
 
 #+END_SRC
-Slime - Very nice when i do stuff with common lisp
+**** Slime - Very nice when i do stuff with common lisp
 #+BEGIN_SRC emacs-lisp
   (use-package slime
     :commands (slime slime-connect)
@@ -304,21 +302,21 @@ Slime - Very nice when i do stuff with common lisp
   #+END_SRC
 
 ****  Nyxt browser configurations for slime
-Use sly to evaluate common lisp because it has better integration with nyxt.
+***** Use sly to evaluate common lisp because it has better integration with nyxt.
 #+BEGIN_SRC emacs-lisp
   (defcustom cl-ide 'slime
       "What IDE to use to evaluate Common Lisp.
 Defaults to Sly because it has better integration with Nyxt."
    :options (list 'sly 'slime))
   #+END_SRC
-Delay to wait for 'cl-ide' commands to reach nyxt
+***** Delay to wait for 'cl-ide' commands to reach nyxt
 #+BEGIN_SRC emacs-lisp
 (defvar emacs-with-nyxt-delay
   0.1)
 
 (setq slime-protocol-version 'ignore)
 #+END_SRC
-Check if emacs is connected to nyxt.
+***** Check if emacs is connected to nyxt.
 #+BEGIN_SRC emacs-lisp
 (defun emacs-with-nyxt-connected-p ()
   "Is `cl-ide' connected to nyxt."
@@ -326,7 +324,8 @@ Check if emacs is connected to nyxt.
    ((eq cl-ide 'slime) (slime-connected-p))
    ((eq cl-ide 'sly) (sly-connected-p))))
    #+END_SRC
-   Connect to cl-ide to HOST and PORT.
+*****  Connect to cl-ide to HOST and PORT.
+  
    #+BEGIN_SRC emacs-lisp
       (defun emacs-with-nyxt--connect (host port)
 	  "Connect `cl-ide' to HOST and PORT."
@@ -334,7 +333,8 @@ Check if emacs is connected to nyxt.
       ((eq cl-ide 'slime) (slime-connect host port))
       ((eq cl-ide 'sly) (sly-connect host port))))
    #+END_SRC
-   Do the same thing ignoring version mismatches.
+*****  Do the same thing ignoring version mismatches.
+  
    #+BEGIN_SRC emacs-lisp
       (defun emacs-with-nyxt-connect (host port)
 	  "Connect `cl-ide' to HOST and PORT."
@@ -343,7 +343,7 @@ Check if emacs is connected to nyxt.
        (message "Starting %s connection..." cl-ide)
        (sleep-for emacs-with-nyxt-delay)))
   #+END_SRC
-  Send STRING to cl-ide.
+*****  Send STRING to cl-ide.
   #+BEGIN_SRC emacs-lisp
     (defun emacs-with-nyxt-eval (string)
         "Send STRING to `cl-ide'."
@@ -351,7 +351,7 @@ Check if emacs is connected to nyxt.
      ((eq cl-ide 'slime) (slime-repl-eval-string string))
      ((eq cl-ide 'sly) (sly-eval `(slynk:interactive-eval-region ,string)))))
    #+END_SRC
-Evaluate S-EXPS with nyxt 'cl-ide' session
+***** Evaluate S-EXPS with nyxt 'cl-ide' session
 #+BEGIN_SRC emacs-lisp
   (defun emacs-with-nyxt-send-sexps (&rest s-exps)
     "Evaluate S-EXPS with Nyxt `cl-ide' session."
@@ -361,7 +361,7 @@ Evaluate S-EXPS with nyxt 'cl-ide' session
 	  (emacs-with-nyxt-eval s-exps-string)
 	(error (format "%s is not connected to Nyxt. Run `emacs-with-nyxt-start-and-connect-to-nyxt' first" cl-ide)))))
       #+END_SRC
-Return current package set for 'cl-ide'
+***** Return current package set for 'cl-ide'
 #+BEGIN_SRC emacs-lisp
 
   (defun emacs-with-nyxt-current-package ()
@@ -370,7 +370,7 @@ Return current package set for 'cl-ide'
      ((eq cl-ide 'slime) (slime-current-package))
      ((eq cl-ide 'sly) (with-current-buffer (sly-mrepl--find-buffer) (sly-current-package)))))
    #+END_SRC
-   Start nyxt with swank and connect to nyxt
+*****   Start nyxt with swank and connect to nyxt
    #+BEGIN_SRC emacs-lisp
    (defun emacs-with-nyxt-start-and-connect-to-nyxt (&optional no-maximize)
   "Start Nyxt with swank capabilities. Optionally skip window maximization with NO-MAXIMIZE."
@@ -399,7 +399,7 @@ Return current package set for 'cl-ide'
                                    when pos do (write-string replacement out)
                                    while pos)))
 #+END_SRC
-Evaluate S-EXPS with emacs
+***** Evaluate S-EXPS with emacs
 #+BEGIN_SRC emacs-lisp
    `(defun eval-in-emacs (&rest s-exps)
       "Evaluate S-EXPS with emacsclient."
@@ -412,7 +412,7 @@ Evaluate S-EXPS with emacs
         (uiop:run-program
          (list "emacsclient" "--eval" s-exps-string))))e
 #+END_SRC
-QR code stuff 
+***** QR code stuff 
 #+BEGIN_SRC emacs-lisp
   `(ql:quickload "cl-qrencode")
   `(define-command-global my/make-current-url-qr-code () ; this is going to be redundant: https://nyxt.atlas.engineer/article/qr-url.org
@@ -421,7 +421,7 @@ QR code stuff
        (cl-qrencode:encode-png (quri:render-uri (url (current-buffer))) :fpath "/tmp/qrcode.png")
        (uiop:run-program (list "nyxt" "/tmp/qrcode.png"))))
 #+END_SRC
-Open buffer html in emacs
+***** Open buffer html in emacs
 #+BEGIN_SRC emacs-lisp
   '(define-command-global my/open-html-in-emacs ()
 			        "Open buffer html in Emacs."
@@ -440,7 +440,7 @@ Open buffer html in emacs
 	      (indent-region (point-min) (point-max))))
      (delete-file "/tmp/temp-nyxt.html"))
       #+END_SRC
-  From @aartaka https://www.reddit.com/r/Nyxt/comments/ock3tu/is_there_something_like_mx_or_esc_in_nyxt/h3wkipl?utm_source=share&utm_medium=web2x&context=3
+*****  From @aartaka https://www.reddit.com/r/Nyxt/comments/ock3tu/is_there_something_like_mx_or_esc_in_nyxt/h3wkipl?utm_source=share&utm_medium=web2x&context=3
   Prompt for the expression and evaluate it, echoing result to the 'message-area'.
 Reads an arbritrary expression with no error checking and messages it to the message area
   #+BEGIN_SRC emacs-lisp
@@ -459,7 +459,7 @@ Bind eval-expression to M-:, but only in emacs-mode.
                                            "M-:" 'eval-expression)
                         scheme))))
 #+END_SRC
-Capture link
+***** Capture link
 #+BEGIN_SRC emacs-lisp
   `(defun emacs-with-nyxt-capture-link ()
 	(let ((url (quri:render-uri (url (current-buffer)))))
@@ -477,7 +477,7 @@ Capture link
 	       "s")
 	    url)))
 #+END_SRC
-Org-capture current page
+***** Org-capture current page
 #+BEGIN_SRC emacs-lisp
   `(define-command-global org-capture ()
 	(eval-in-emacs
@@ -492,7 +492,7 @@ Org-capture current page
 	    (org-capture nil "wN"))
 	 (echo "Note stored!")))
 #+END_SRC
-org-roam capture
+***** org-roam capture
 #+BEGIN_SRC emacs-lisp
   `(define-command-global org-roam-capture ()
 	(let ((quote (%copy))
@@ -533,7 +533,7 @@ org-roam capture
       (emacs-with-nyxt-send-sexps
        '(toggle-fullscreen))))
   #+END_SRC
-Open URL with nyxt and optionally define BUFFER-TITLE
+***** Open URL with nyxt and optionally define BUFFER-TITLE
 #+BEGIN_SRC emacs-lisp
 (defun emacs-with-nyxt-browse-url-nyxt (url &optional buffer-title)
   (interactive "sURL: ")
@@ -546,20 +546,20 @@ Open URL with nyxt and optionally define BUFFER-TITLE
         `(:buffer (make-buffer :title ,buffer-title))
       nil))))
 #+END_SRC
-Close connection
+***** Close connection
 #+BEGIN_SRC emacs-lisp
 (defun emacs-with-nyxt-close-nyxt-connection ()
   (interactive)
   (emacs-with-nyxt-send-sexps '(quit)))
   #+END_SRC
- Browse URL with Nyxt. NEW-WINDOW is ignored.
+***** Browse URL with Nyxt. NEW-WINDOW is ignored.
 #+BEGIN_SRC emacs-lisp
 (defun browse-url-nyxt (url &optional new-window)
   (interactive "sURL: ")
   (unless (emacs-with-nyxt-connected-p) (emacs-with-nyxt-start-and-connect-to-nyxt))
   (emacs-with-nyxt-browse-url-nyxt url url))
   #+END_SRC
-  Search current nyxt buffer for STRING
+*****  Search current nyxt buffer for STRING
   #+BEGIN_SRC emacs-lisp
   (defun emacs-with-nyxt-search-first-in-nyxt-current-buffer (string)
   (interactive "sString to search: ")
@@ -571,7 +571,7 @@ Close connection
            (nyxt/web-mode::query-buffer :query ,string)))
      :scroll 't)))
      #+END_SRC
-     Make qr code of current url
+*****    Make qr code of current url
      #+BEGIN_SRC emacs-lisp
      (defun emacs-with-nyxt-make-qr-code-of-current-url ()
   (interactive)
@@ -585,7 +585,8 @@ Close connection
         (auto-revert-mode))
     (error "You cannot use this until you have Quicklisp installed! Check how to do that at: https://www.quicklisp.org/beta/#installation")))
     #+END_SRC
-    Return nyxt buffers
+*****   Return nyxt buffers
+   
     #+BEGIN_SRC emacs-lisp
     (defun emacs-with-nyxt-get-nyxt-buffers ()
   (when (emacs-with-nyxt-connected-p)
@@ -593,7 +594,7 @@ Close connection
      (emacs-with-nyxt-send-sexps
       '(map 'list (lambda (el) (slot-value el 'title)) (buffer-list))))))
 #+END_SRC
-Interactively switch nyxt buffers.  If argument is provided switch to buffer with TITLE.
+***** Interactively switch nyxt buffers.  If argument is provided switch to buffer with TITLE.
 #+BEGIN_SRC emacs-lisp
 (defun emacs-with-nyxt-nyxt-switch-buffer (&optional title)
   (interactive)
@@ -603,7 +604,7 @@ Interactively switch nyxt buffers.  If argument is provided switch to buffer wit
          `(switch-buffer :id (slot-value (find-if #'(lambda (el) (equal (slot-value el 'title) ,title)) (buffer-list)) 'id))))
     (error (format "%s is not connected to Nyxt. Run `emacs-with-nyxt-start-and-connect-to-nyxt' first" cl-ide))))
 #+END_SRC
-Get nyxt commands.
+***** Get nyxt commands.
 #+BEGIN_SRC emacs-lisp
       (defun emacs-with-nyxt-get-nyxt-commands ()
 	(when (emacs-with-nyxt-connected-p)
@@ -613,7 +614,7 @@ Get nyxt commands.
 
 	       (map 'list (lambda (el) (slot-value el 'name)) (funcall (slot-value commands 'prompter:CONSTRUCTOR) commands)))))))
 #+END_SRC
-Run nyxt commands
+***** Run nyxt commands
 #+BEGIN_SRC emacs-lisp
 (defun emacs-with-nyxt-nyxt-run-command (&optional command)
   (interactive)
@@ -622,7 +623,7 @@ Run nyxt commands
         (emacs-with-nyxt-send-sexps `(nyxt::run-async ',(read command))))
     (error (format "%s is not connected to Nyxt. Run `emacs-with-nyxt-start-and-connect-to-nyxt' first" cl-ide))))
 #+END_SRC
-Take over the nyxt prompt and let Emacs handle completions.
+***** Take over the nyxt prompt and let Emacs handle completions.
 #+BEGIN_SRC emacs-lisp
 (defun emacs-with-nyxt-nyxt-take-over-prompt ()
   (interactive)
@@ -657,7 +658,7 @@ Take over the nyxt prompt and let Emacs handle completions.
                     (funcall (car (slot-value selected-class 'PROMPTER::ACTIONS)) (list (slot-value suggestion 'PROMPTER:VALUE)))
                   (funcall (car (slot-value (car sources) 'PROMPTER::ACTIONS)) (list completed)))))))))
 #+END_SRC
-Completion function for nyxt completion
+***** Completion function for nyxt completion
 #+BEGIN_SRC emacs-lisp
 (defun emacs-with-nyxt-nyxt-complete (prompt names)
   (let* ((completions (--map (s-join "\t" (--map (s-join ": " it) it)) names))
@@ -667,7 +668,7 @@ Completion function for nyxt completion
         (nth completed-index names)
       completed-string)))
       #+END_SRC
-Decode an ENCODED link containing some elisp. This is for the '.ag91' links
+***** Decode an ENCODED link containing some elisp. This is for the '.ag91' links
 #+BEGIN_SRC emacs-lisp
 (defun emacs-with-nyxt-decode-command (encoded)
   (--> encoded
@@ -680,9 +681,7 @@ Decode an ENCODED link containing some elisp. This is for the '.ag91' links
        read
        eval))
 #+END_SRC
-#+BEGIN_SRC emacs-lisp
-(provide 'emacs-with-nyxt)
-#+END_SRC
+
 **** LSP stuff - turn off some things that make performance worse and some stuff i just like
 #+BEGIN_SRC emacs-lisp
 
@@ -710,7 +709,7 @@ Decode an ENCODED link containing some elisp. This is for the '.ag91' links
     (setq lsp-enable-snippet nil)
     :commands lsp)
   #+END_SRC
-  LSP-ui because i need that(so helpfull) and ivy stuff.
+*****  LSP-ui because i need that(so helpfull) and ivy stuff.
 #+BEGIN_SRC emacs-lisp
   (use-package lsp-ui
    :defer 12
@@ -718,13 +717,7 @@ Decode an ENCODED link containing some elisp. This is for the '.ag91' links
 
   ;; if you are ivy user
   #+END_SRC
-  Optionally use eglot
-  #+BEGIN_SRC emacs-lisp
-  ;; (add-hook 'prog-mode-hook #'eglot-ensure)
-;; (with-eval-after-load 'eglot
-;;  (add-to-list 'eglot-server-programs
-;;                '(emacs-lisp-mode . ("emacs-lsp" "--stdio"))))
-#+END_SRC
+
 **** My custom keybinds for terminal stuff because i like a terminal at the bottom
 Split the window and open a terminal in the new window, taking only a quarter of the screen.
 Height of top window is 1/4 of the frame height.
@@ -736,14 +729,14 @@ Height of top window is 1/4 of the frame height.
    (other-window 1)
    (term "sh"))
 #+END_SRC
-Close the terminal window at the bottom or the current window if its a terminal
+***** Close the terminal window at the bottom or the current window if its a terminal
 #+BEGIN_SRC emacs-lisp
   (defun close-terminal-at-bottom ()
    (interactive)
    (let ((current-window (selected-window)))
       (if (eq 'term-mode (buffer-local-value 'major-mode (window-buffer current-window)))
 	  #+END_SRC
-	  If the current window window is a terminal, close it.
+***** 	  If the current window window is a terminal, close it.
 	  #+BEGIN_SRC emacs-lisp
 		    (delete-window current-window)
         #+END_SRC
@@ -753,7 +746,7 @@ Close the terminal window at the bottom or the current window if its a terminal
 			     (eq 'term-mode (buffer-local-value 'major-mode (window-buffer (next-window)))))
 		    (delete-window (next-window))))))
 #+END_SRC
-Split the window and open a Python shell in the new window, taking only a quarter of the screen.
+***** Split the window and open a Python shell in the new window, taking only a quarter of the screen.
 #+BEGIN_SRC emacs-lisp
 	    (defun open-python-shell-at-bottom ()
 	     (interactive)
@@ -762,7 +755,7 @@ Split the window and open a Python shell in the new window, taking only a quarte
 	     (other-window 1)
 	     (term "python3"))
 #+END_SRC
-Make the hydra
+***** Make the hydra
 #+BEGIN_SRC emacs-lisp
 	    (defhydra hydra-terminal-python-manager (:color blue)
 	     "Terminal/Python"
@@ -772,12 +765,12 @@ Make the hydra
 
 	    (global-set-key (kbd "C-c t") 'hydra-terminal-python-manager/body)
 #+END_SRC
-**** Org Mode Configs
-Make org mode default for .org files
+*** Org Mode Configs
+**** Make org mode default for .org files
 #+BEGIN_SRC emacs-lisp
 (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
 #+END_SRC
-Org - Roam
+**** Org-Roam
 MAKE SURE TO MAKE THE DIRECTORY ~/roam
 #+BEGIN_SRC emacs-lisp
   (use-package org-roam
@@ -799,7 +792,7 @@ MAKE SURE TO MAKE THE DIRECTORY ~/roam
    )
 
   #+END_SRC
-Make Org more beautifull
+**** Make Org more beautifull
 #+BEGIN_SRC emacs-lisp
     (setq org-hide-emphasis-markers t)
       (font-lock-add-keywords 'org-mode
@@ -816,7 +809,7 @@ Make Org more beautifull
    ;; Additional configuration can go here
    )
 #+END_SRC
-  Org Keybindings
+****  Org Keybindings
     #+BEGIN_SRC emacs-lisp
       (defun my-org-todo-toggle ()
     (interactive)
@@ -835,7 +828,7 @@ Make Org more beautifull
     (org-deadline nil "+1w"))
   (global-set-key (kbd "C-c d") 'org-deadline-in-one-week)
     #+END_SRC
-    Org agenda configuration
+****    Org agenda configuration
     #+BEGIN_SRC emacs-lisp
       (setq org-agenda-files '("~/agenda.org"))
 (setq org-todo-keywords
@@ -850,7 +843,8 @@ Make Org more beautifull
   (org-agenda nil "t"))
 (global-set-key (kbd "C-c a") 'my-split-and-open-todo-list)
       #+END_SRC
-      Export hydra thing for org because i hate the default dispatcher
+**** Export hydra thing for org because i hate the default dispatcher
+
       #+BEGIN_SRC emacs-lisp
 (defhydra hydra-org-export-and-view ()
  "Export and view"
@@ -862,7 +856,7 @@ Make Org more beautifull
  ("q" nil "quit"))
 (define-key org-mode-map (kbd "C-c C-e") 'hydra-org-export-and-view/body)
 #+END_SRC
-Pandoc stuff for org
+**** Pandoc stuff for org
 #+BEGIN_SRC emacs-lisp
 (defun org-export-to-docx-and-open ()
  (interactive)
@@ -870,7 +864,7 @@ Pandoc stuff for org
     (shell-command (format "pandoc %s -o %s" (buffer-file-name) docx-file))
     (find-file docx-file)))
 #+END_SRC
-Export to html and open in nyxt
+**** Export to html and open in nyxt
 #+BEGIN_SRC emacs-lisp
 (defun org-export-to-html-and-open-in-nyxt ()
  "Export the current Org file to HTML and open it in Nyxt."
@@ -882,7 +876,7 @@ Export to html and open in nyxt
                 (when (get-process "Nyxt")
                   (delete-process (get-process "Nyxt")))))))
 #+END_SRC
-Export to markdown and open in nyxt
+**** Export to markdown and open in nyxt
 #+BEGIN_SRC emacs-lisp
 (defun markdown-export-to-html-and-open-in-nyxt ()
  "Export the current Markdown file to HTML and open it in Nyxt."
@@ -894,7 +888,7 @@ Export to markdown and open in nyxt
                 (when (get-process "Nyxt")
                  (delete-process (get-process "Nyxt")))))))
 #+END_SRC
-Keymap for org-export-to-html-and-open-in-nyxt
+**** Keymap for org-export-to-html-and-open-in-nyxt
 #+BEGIN_SRC emacs-lisp
 
 (defvar org-export-to-html-and-open-in-nyxt-map (make-sparse-keymap)
@@ -905,28 +899,9 @@ Keymap for org-export-to-html-and-open-in-nyxt
           (lambda ()
             (local-set-key (kbd "C-c C-o") 'markdown-export-to-html-and-open-in-nyxt)))
 #+END_SRC
-	Some stuff for dumping emacs
-       Generate the lines to include in the lisp/loadup.el file
-      to place all of the libraries that are loaded by your InitFile
-      into the main dumped emacs.
-#+BEGIN_SRC emacs-lisp
-	(defun loadup-gen ()
-       (interactive)
-       (defun get-loads-from-*Messages* ()
-	  (save-excursion
-	    (let ((retval ()))
-	      (set-buffer "*Messages*")
-	      (beginning-of-buffer)
-	      (while (search-forward-regexp "^Loading " nil t)
-		(let ((start (point)))
-		  (search-forward "...")
-		  (backward-char 3)
-		  (setq retval (cons (buffer-substring-no-properties start (point)) retval))))
-	      retval)))
-       (dolist (file (get-loads-from-*Messages*))
-	  (princ (format "(load \"%s\")\n" file))))
-    #+END_SRC
-    Reduce clutter by making backups and autosaves in certain directories
+
+*** Reduce clutter by making backups and autosaves in certain directories
+
     #+BEGIN_SRC emacs-lisp
       (let ((backup-dir "~/.emacs.d/backups")
       (auto-saves-dir "~/.emacs.d/autosaves"))
@@ -940,27 +915,15 @@ Keymap for org-export-to-html-and-open-in-nyxt
         tramp-backup-directory-alist `((".*" . ,backup-dir))
         tramp-auto-save-directory auto-saves-dir))
     #+END_SRC
-   More stuff for dumping emacs
-   #+BEGIN_SRC emacs-lisp
-   (defun dump-load-path ()
-  (interactive)
-  (with-temp-buffer
-    (insert (prin1-to-string `(setq load-path ',load-path)))
-    (fill-region (point-min) (point-max))
-    (write-file "~/.emacs.d/load-path.el")))
 
-(defun dump-emacs ()
-  (interactive)
-  (shell-command "emacs --batch -l ~/.edump -eval '(dump-load-path)' -eval '(dump-emacs-portable \"~/emacs.dump\")'"))
-  #+END_SRC
-  Undo tree
+***  Undo tree
   #+BEGIN_SRC emacs-lisp
          (use-package undo-tree
         :init
         (global-undo-tree-mode)
         )
 #+END_SRC
-Elcord - unnecessecary package i use to flex my emacs.
+**** Elcord - unnecessecary package i use to flex my emacs.
 #+BEGIN_SRC emacs-lisp
 (use-package elcord
  :defer 20
@@ -971,13 +934,13 @@ Elcord - unnecessecary package i use to flex my emacs.
 
   #+END_SRC
 **** Latex stuff
-load auctex
+*** load auctex
 #+BEGIN_SRC emacs-lisp
     (use-package auctex
     
   :hook (latex-mode . LaTeX-mode-hook)
   #+END_SRC
-Disable display of compilation log and add makeglossaries to the tex command for easy managament of glossaries
+*** Disable display of compilation log and add makeglossaries to the tex command for easy managament of glossaries
 #+BEGIN_SRC emacs-lisp
   :config
   (setq TeX-show-compilation nil)
@@ -987,7 +950,7 @@ Disable display of compilation log and add makeglossaries to the tex command for
 					 :help "Run makeglossaries script, which will choose xindy or makeindex") t))
   #+END_SRC
 
-  set up reftex for better reference management and auto-parse, also use pdf
+***  set up reftex for better reference management and auto-parse, also use pdf
   #+BEGIN_SRC emacs-lisp
     :config
       (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
@@ -1001,7 +964,7 @@ Disable display of compilation log and add makeglossaries to the tex command for
   (setq TeX-parse-self t)
   (setq-default TeX-PDF-mode t)
   #+END_SRC
-  Define a function to delete the current macro in auctex
+***  Define a function to delete the current macro in auctex
   #+BEGIN_SRC emacs-lisp
 (defun TeX-remove-macro ()
  (interactive)
@@ -1016,14 +979,15 @@ Disable display of compilation log and add makeglossaries to the tex command for
 (add-hook 'LaTeX-mode-hook (lambda () (bind-key "M-DEL" 'TeX-remove-macro)))
 (setq TeX-view-program-selection '((output-pdf "Zathura")))
 #+END_SRC
-A bit of IRC configuration stuff
+*** A bit of IRC configuration stuff
 #+BEGIN_SRC emacs-lisp
 (setq rcirc-track-ignore-server-buffer-flag t)
 (rcirc-track-minor-mode 1)
 (setq alert-default-style 'libnotify)
 (setq rcirc-notify-message "message from %s")
 #+END_SRC
-Magit - i dont use it that much
+*** Magit - i dont use it that much
+I really need to work on git
 #+BEGIN_SRC emacs-lisp
   (use-package magit
     :commands (magit-clone magit magit-push magit-commit magit-stage-modified magit-stage-file)
@@ -1042,19 +1006,16 @@ see https://github.com/redguardtoo/mastering-emacs-in-one-year-guide/blob/master
 
 #+END_SRC
 This is for encrypted authinfo
+
+*** Org-mime
+
 #+BEGIN_SRC emacs-lisp
-  ;; (use-package epa-file
-  ;; (epa-file-enable)
-    
-#+END_SRC
-  Org-mime
-  #+BEGIN_SRC emacs-lisp
      (use-package org-mime
        :commands (org-mime-htmlize)
        :config
     (setq org-mime-library 'mml))
  #+END_SRC
-Signature Stuff
+***** Signature Stuff
 #+BEGIN_SRC emacs-lisp
 (defun my-insert-html-signature ()
  (let ((signature "<div style=\"display: block; white-space: nowrap; border: 1px solid #000; text-decoration: underline;\">
@@ -1063,7 +1024,7 @@ Signature Stuff
     (goto-char (point-max))
     (insert signature)))
 #+END_SRC
-more org-mime stuff
+***** more org-mime stuff
 #+BEGIN_SRC emacs-lisp
  (add-hook 'org-mime-html-hook 'my-insert-html-signature)
 (add-hook 'message-mode-hook
@@ -1080,13 +1041,13 @@ more org-mime stuff
             (org-mime-change-element-style
              "blockquote" "border-left: 2px solid gray; padding-left: 4px;")))
  #+END_SRC
- Dianyou for searching in gnus
+**** Dianyou for searching in gnus
  #+BEGIN_SRC emacs-lisp
    (use-package dianyou
      :commands (gnus)
      )
 #+END_SRC
-The epic hydra from the guide, VERY usefull :D
+**** The epic hydra from the guide, VERY usefull :D
 #+BEGIN_SRC emacs-lisp
 (eval-after-load 'gnus-group
   '(progn
@@ -1108,7 +1069,7 @@ The epic hydra from the guide, VERY usefull :D
        ("q" nil))
      (define-key gnus-group-mode-map "y" 'hydra-gnus-group/body)))
 #+END_SRC
-Another hydra i took from the guide for summary-mode
+***** Another hydra i took from the guide for summary-mode
 #+BEGIN_SRC emacs-lisp
 (eval-after-load 'gnus-sum
   '(progn
@@ -1139,7 +1100,7 @@ Another hydra i took from the guide for summary-mode
        ("q" nil))
      (define-key gnus-summary-mode-map "y" 'hydra-gnus-summary/body)))
 #+END_SRC
-Another hydra for article-mode
+***** Another hydra for article-mode
 #+BEGIN_SRC emacs-lisp
 
 (eval-after-load 'gnus-art
@@ -1162,7 +1123,7 @@ Another hydra for article-mode
      ;; y is not used by default
      (define-key gnus-article-mode-map "y" 'hydra-gnus-article/body)))
 #+END_SRC
-Another hydra for message-mode
+***** Another hydra for message-mode
 #+BEGIN_SRC emacs-lisp
 
 (eval-after-load 'message
@@ -1204,8 +1165,8 @@ Another hydra for message-mode
     (setq delete-selection-mode nil))) 
 (global-set-key (kbd "C-c l") 'select-line)
 #+END_SRC
-**** IVY
-i dont use swiper because i hate how it looks
+**** Vertico
+Simple completions
 #+BEGIN_SRC emacs-lisp
 
           (use-package vertico
@@ -1221,19 +1182,25 @@ i dont use swiper because i hate how it looks
             (vertico-cycle t)
             :init
             (vertico-mode))
-
+#+END_SRC
+**** Save minibuffer history
+#+BEGIN_SRC emacs-lisp
           (use-package savehist
             :init
             (savehist-mode))
-
+#+END_SRC
+**** Descriptions in minibuffer
+#+BEGIN_SRC emacs-lisp
           (use-package marginalia
-            :after vertico
-            :if user-vertico
             :ensure t
             :custom
             (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
             :init
             (marginalia-mode))
+      #+END_SRC
+**** IVY and counsel
+Other completions
+#+BEGIN_SRC emacs-lisp
       
                (use-package ivy
   	       :if user-ivy
@@ -1263,7 +1230,7 @@ i dont use swiper because i hate how it looks
             :map minibuffer-local-map
             ("C-r" . counsel-minibuffer-history)))
 #+END_SRC
-Wind move is the most usefull package
+**** Wind move is the most usefull package
 #+BEGIN_SRC emacs-lisp
   (global-set-key (kbd "C-c <left>")  'windmove-left)
   (global-set-key (kbd "C-c <right>") 'windmove-right)
@@ -1274,45 +1241,42 @@ Wind move is the most usefull package
     (global-set-key (kbd "C-c C-<up>") 'windmove-swap-states-up)
      (global-set-key (kbd "C-c C-<down>") 'windmove-swap-states-down) 				
 #+END_SRC
-**** MISC configs
-Use nerd icons for treemacs.
+**** Use nerd icons for treemacs.
 #+BEGIN_SRC emacs-lisp
   (use-package treemacs-nerd-icons
     :demand t
     :config
     (treemacs-load-theme "nerd-icons"))
 #+END_SRC
-Usefull keybind
+**** C-x C-k kills current buffer
 #+BEGIN_SRC emacs-lisp
 (global-set-key (kbd "C-x C-k") 'kill-current-buffer)
 #+END_SRC
 system-packages, usefull package so i can watch my libraries compile(i use gentoo btw)
-#+BEGIN_SRC emacs-lisp
-  ;; (use-package system-packages
-  ;;   :defer 20
-  ;;   :config
-  ;;  (setq system-packages-use-sudo t)
-  ;;  (setq system-packages-package-manager 'emerge))
-#+END_SRC
-Indent-guide
+
+**** Markdown mode open in nyxt
 #+BEGIN_SRC emacs-lisp
 (add-hook 'markdown-mode-hook
           (lambda ()
             (local-set-key (kbd "C-c C-o") 'markdown-export-to-html-and-open-in-nyxt)))
+#+END_SRC
+**** Indent-guide
+#+BEGIN_SRC emacs-lisp
+
 (use-package indent-guide
  :hook (python-mode . indent-guide-mode)
  :config
  (set-face-background 'indent-guide-face "gray")) ; Set the color of the indent guides
 #+END_SRC
 
-    Make auctex automatically parse the document and enable pdf mode
+****    Make auctex automatically parse the document and enable pdf mode
    #+BEGIN_SRC emacs-lisp
       (setq-default TeX-master nil)
     (setq TeX-auto-save t)
     (setq TeX-parse-self t)
     (setq-default TeX-PDF-mode t)
   #+END_SRC
-  Disable automatic display of compilation log
+****  Disable automatic display of compilation log
   #+BEGIN_SRC emacs-lisp
    (setq TeX-show-compilation nil)
     #+END_SRC
@@ -1341,7 +1305,7 @@ Switch themes at certain times
 
     (run-at-time "00:00" (* 30 60) 'switch-theme-based-on-time)
 #+END_SRC
-Guru mode because i have bad habits
+**** Guru mode because i have bad habits
 #+BEGIN_SRC emacs-lisp
 (use-package guru-mode
 :init
@@ -1376,7 +1340,7 @@ Guru mode because i have bad habits
     (global-set-key (kbd "S-C-<down>") 'shrink-window)
     (global-set-key (kbd "S-C-<up>") 'enlarge-window)
 #+END_SRC
-** GOD mode - THE BEST PACKAGE EVERY I LOVE THIS
+**** GOD mode - THE BEST PACKAGE EVERY I LOVE THIS
 #+BEGIN_SRC emacs-lisp
     (use-package god-mode
      :commands god-mode-all
@@ -1395,7 +1359,7 @@ Guru mode because i have bad habits
     ;; Function to activate God Mode after exiting Dashboard mode
 
 #+END_SRC
-NIX mode because i use nixos btw
+**** NIX mode because i use nixos btw
 #+BEGIN_SRC emacs-lisp
 
 
@@ -1405,7 +1369,7 @@ NIX mode because i use nixos btw
 
 #+END_SRC
 
-Exheres mode, not in melpa and for exherbo, because i also use exherbo btw.
+**** Exheres mode, not in melpa and for exherbo, because i also use exherbo btw.
 #+BEGIN_SRC emacs-lisp
 
   (use-package exheres-mode
@@ -1419,7 +1383,7 @@ Exheres mode, not in melpa and for exherbo, because i also use exherbo btw.
   
 
 #+END_SRC
-  Shortcut to insert org codeblock
+****  Shortcut to insert org codeblock
 #+BEGIN_SRC emacs-lisp
 (defun insert-org-code-block-if-org-mode ()
   "Insert an org-mode code block if in org-mode."
@@ -1435,18 +1399,18 @@ Exheres mode, not in melpa and for exherbo, because i also use exherbo btw.
 (add-hook 'org-mode-hook 'setup-org-mode-shortcuts)
 
 #+END_SRC 
-Emacs randr, usefull because its the best randr implementation i found
+**** Emacs randr, usefull because its the best randr implementation i found
 #+BEGIN_SRC emacs-lisp
   (use-package exrandr
     :commands (xrandr-interface)
     :straight (:host gitlab :repo "oblivikun/emacs-xrandr"))
 #+END_SRC
-Personal configurations, do create this file or comment it out
+**** Personal configurations, do create this file or comment it out
 #+BEGIN_SRC emacs-lisp
 (load-file (expand-file-name "personal.el" user-emacs-directory))
 
 #+END_SRC
-Kconfig mode, this is usefull
+**** Kconfig mode, this is usefull
 #+BEGIN_SRC emacs-lisp
   (defun activate-conf-mode-for-linux-config ()
     "Activate conf-mode if the file is under /usr/src/linux/*/.config"
@@ -1470,12 +1434,16 @@ Kconfig mode, this is usefull
 ** EXWM!!!
 #+BEGIN_SRC emacs-lisp
 
-   (use-package exwm
+(use-package exwm
   :demand t
   :if user-exwm
   :config
   #+END_SRC
-  brightness control
+*** Misc Keys.
+Keys that use special keys that are not guaranteed to be on every keyboad
+  
+****  Brightness control
+Uses https://github.com/Ventto/lux
   #+BEGIN_SRC emacs-lisp
 
   		       (defun increase-brightness ()
@@ -1487,13 +1455,15 @@ Kconfig mode, this is usefull
   		        (shell-command "lux -s 10%"))
 
 #+END_SRC
-screenshots
+**** Screenshots
+Uses flameshot
 #+BEGIN_SRC emacs-lisp
 		                (defun flameshot ()
 		                  (interactive)
 		                  (shell-command "flameshot gui"))
 #+END_SRC
-Volume control
+**** Volume control
+Uses pamixer
 #+BEGIN_SRC emacs-lisp
 (defun increase-volume ()
                          (interactive)
@@ -1507,16 +1477,11 @@ Volume control
                          (interactive)
                          (shell-command "pamixer --toggle-mute"))
 #+END_SRC
-Disable workspaces - we dont need them
+
 #+BEGIN_SRC emacs-lisp
 #+END_SRC
-Make window class name emacs buffer name so i can C-x b
-#+BEGIN_SRC emacs-lisp
-  (add-hook 'exwm-update-class-hook
-                               (lambda ()
-                                 (exwm-workspace-rename-buffer exwm-class-name)))
-  #+END_SRC
-Keybindings
+
+*** Keybindings
 | Key                  | Action                                   |
 | Super + r            | reset to line mode                       |
 | Super + w            | Switch workspace interactively           |
@@ -1541,7 +1506,7 @@ Keybindings
 | Volume up            | Increase volume with pamixer             |
 | Volume down          | Decrease volume with pamixer             |
 | Volume mute          | Toggle volume with pamixer               |
-Prefix keys
+**** Prefix keys
 #+BEGIN_SRC emacs-lisp
 
       ;; These keys should always pass through to Emacs
@@ -1558,8 +1523,9 @@ Prefix keys
   (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
 
   #+END_SRC
-  Resizing
-  #+BEGIN_SRC emacs-lisp
+**** Resizing
+
+#+BEGIN_SRC emacs-lisp
   (defhydra exwm-window-resize (:timeout 4)
   ("<left>" (exwm-layout-shrink-window-horizontally 10) "shrink h")
   ("<right>" (exwm-layout-enlarge-window-horizontally 10) "enlarge h")
@@ -1567,11 +1533,12 @@ Prefix keys
   ("<down>" (exwm-layout-enlarge-window 10) "enlarge v")
   ("q" nil "quit" :exit t))
   #+END_SRC
-  APP launcher
+****  Application launcher
   #+BEGIN_SRC emacs-lisp
 (use-package app-launcher
   :straight '(app-launcher :host github :repo "SebastienWae/app-launcher"))
 #+END_SRC
+**** Key definitions
   #+BEGIN_SRC emacs-lisp
     (unless (get 'exwm-input-global-keys 'saved-value)
                            (setq exwm-input-global-keys
@@ -1644,9 +1611,16 @@ Prefix keys
                             (exwm-input-set-key (kbd "<XF86AudioLowerVolume>") 'decrease-volume)
                             (exwm-input-set-key (kbd "<XF86AudioMute>") 'toggle-volume)
   #+END_SRC
-Utilities
-  #+BEGIN_SRC emacs-lisp
+*** Utilities
+**** Run in background(helper function)
 
+#+BEGIN_SRC emacs-lisp
+          (defun run-in-background (command)
+            (let ((command-parts (split-string command "[ ]+")))
+              (apply #'call-process `(,(car command-parts) nil 0 nil ,@(cdr command-parts)))))
+#+END_SRC
+**** Class and Title updates
+#+BEGIN_SRC emacs-lisp
                     (defun exwm-update-class ()
                       (exwm-workspace-rename-buffer exwm-class-name))
 
@@ -1658,31 +1632,36 @@ Utilities
 
                   ;; When window title updates, use it to set the buffer name
                   (add-hook 'exwm-update-title-hook #'exwm-update-title)
-    (require 'exwm-randr)
+    #+END_SRC
+**** Multi monitor stuff
+    You may need to change this
+    #+BEGIN_SRC emacs-lisp
+      (require 'exwm-randr)
 
-        (exwm-randr-enable)
-                (setq exwm-workspace-show-all-buffers t)
-            (setq exwm-randr-workspace-monitor-plist '(2 "eDP1" 3 "HDMI2"))
+          (exwm-randr-enable)
+                  (setq exwm-workspace-show-all-buffers t)
+              (setq exwm-randr-workspace-monitor-plist '(2 "eDP1" 3 "HDMI2"))
 
-        (defun run-in-background (command)
-          (let ((command-parts (split-string command "[ ]+")))
-            (apply #'call-process `(,(car command-parts) nil 0 nil ,@(cdr command-parts)))))
 
-        (defun set-wallpaper ()
-          (interactive)
-          ;; NOTE: You will need to update this to a valid background path!
-          (start-process-shell-command
-              "feh" nil  "feh --bg-tile ~/Pictures/wal2.png"))
-            (defun update-displays ()
+                  (defun update-displays ()
                   (run-in-background "autorandr --change --force")
                   (set-wallpaper)
                   (message "Display config: %s"
                            (string-trim (shell-command-to-string "autorandr --current"))))
                 
+#+END_SRC
+**** Wallpaper
+#+BEGIN_SRC emacs-lisp
+        (defun set-wallpaper ()
+          (interactive)
+          ;; NOTE: You will need to update this to a valid background path!
+          (start-process-shell-command
+              "feh" nil  "feh --bg-tile ~/Pictures/wal2.png"))
+#+END_SRC                
 
 
 #+END_SRC
-  Modeline Shows in exwm windows
+**** Modline
   
   #+BEGIN_SRC emacs-lisp
             (use-package exwm-modeline
@@ -1697,8 +1676,9 @@ Utilities
 
               	 
 #+END_SRC
-                         
-Volume indicator
+
+
+**** Volume indicator
 #+BEGIN_SRC emacs-lisp
 (defun my-get-volume-level ()
   "Fetches the current volume level using pamixer."
@@ -1716,114 +1696,156 @@ Volume indicator
 #+END_SRC
 
 ** CONSULT
+**** Consult Keys
+| Key     | Action                      | Description                                                            |
+| C-c M-x | consult-mode-command        | Run a command from any of the given modes                              |
+| C-c h   | consult-history             | Insert string from history of the current buffer                       |
+| C-c k   | consult-kmacro              | Run a keyboard macro                                                   |
+| C-c m   | consult-man                 | search for man page given initial input                                |
+| C-c i   | consult-info                | Full text search through texinfo manuals                               |
+| C-x M-: | consult-complex-command     | Evaluate command from command history                                  |
+| C-x b   | consult-buffer              | Enhanced switch-to-buffer, with support for virtual buffers            |
+| C-x 4 b | consult-buffer-other-window | Like consult-buffer, switches to buffer in other window                |
+| C-x 5 b | consult-buffer-other-frame  | Like consult-buffer, switches to buffer in other frame                 |
+| C-x t b | consult-buffer-other-tab    | Like consult-buffer, switches to buffer in other frame                 |
+| C-x r b | consult-bookmark            | If bookmark NAME exists open it, otherwise create bookmark NAME        |
+| C-x p b | consult-project-buffer      | Enhanced project-switch-to-buffer with support for virtual buffers     |
+| M-#     | consult-register-load       | Load a register                                                        |
+| M-'     | consult-register-store      | Store a register                                                       |
+| C-M-#   | consult-register            | Load register and either jump to location or insert the stored text    |
+| M-y     | consult-yank-pop            | Replace just yanked stretch of killed text with a diffirent stretch    |
+| M-g e   | consult-compile-error       | Jump to a compilation error in the current buffer                      |
+| M-g f   | consult-flymake             | Jump to flymake diagnostic                                             |
+| M-g g   | consult-goto-line           | Goto a line                                                            |
+| M-g o   | consult-org-heading         | Jump to an org heading                                                 |
+| M-g m   | consult-mark                | Jump to a marker in 'mark-ring                                         |
+| M-g k   | consult-global-mark         | Jump to a marker in 'global-mark-ring                                  |
+| M-g i   | consult-imenu               | Jump to a place in the buffer chosen using a buffer menu or mouse menu |
+| M-g I   | consult-imenu-multi         | Select item from the imenus of all buffers from the same project       |
+| M-s d   | consult-find                | Search files with find in a directory                                  |
+| M-s c   | consult-locate              | Search for files with locate that match given initial input            |
+| M-s g   | consult-grep                | Search with grep for files in a directory                              |
+| M-s G   | consult-git-grep            | Search with git grep for files in a directory given initial input      |
+| M-s r   | consult-ripgrep             | Search with rg for files in a directory given initial input            |
+| M-s l   | consult-line                | Search for a matching line                                             |
+| M-s L   | consult-line-multi          | Search for a matching line in multiple buffers                         |
+| M-s k   | consult-keep-lines          | Select a subset of the lines in a buffer with live preview             |
+| M-s u   | consult-focus-lines         | Hide or show lines using overlays                                      |
+| M-s e   | consult-isearch-history     | Read a search string with completion from the isearch history          |
+***** In isearch-mode-map:
+| Key   | Action                  | Description                                                   |
+| M-e   | consult-isearch-history | Read a search string with completion from the isearch history |
+| M-s l | consult-line            | Search for a matching line                                    |
+| M-s L | consult-line-multi      | Search for a matching line in multiple buffers                |
+***** In Minibuffer:
+| Key | Action          | Description                                  |
+| M-s | consult-history | Insert string from history of current buffer |
+**** Use-package declarationp
+Shamelessly taken from example
 #+BEGIN_SRC emacs-lisp
-(use-package consult
-:if user-consult
-  ;; Replace bindings. Lazily loaded by `use-package'.
-  :bind (;; C-c bindings in `mode-specific-map'
-         ("C-c M-x" . consult-mode-command)
-         ("C-c h" . consult-history)
-         ("C-c k" . consult-kmacro)
-         ("C-c m" . consult-man)
-         ("C-c i" . consult-info)
+  (use-package consult
+  :if user-consult
+    ;; Replace bindings. Lazily loaded by `use-package'.
+    :bind (;; C-c bindings in `mode-specific-map'
+           ("C-c M-x" . consult-mode-command)
+           ("C-c h" . consult-history)
+           ("C-c k" . consult-kmacro)
+           ("C-c m" . consult-man)
+           ("C-c i" . consult-info)
 
-         ([remap Info-search] . consult-info)
-         ;; C-x bindings in `ctl-x-map'
-         ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
-         ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
-         ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
-         ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
-         ("C-x t b" . consult-buffer-other-tab)    ;; orig. switch-to-buffer-other-tab
-         ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
-         ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
-         ;; Custom M-# bindings for fast register access
-         ("M-#" . consult-register-load)
-         ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
-         ("C-M-#" . consult-register)
-         ;; Other custom bindings
-         ("M-y" . consult-yank-pop)                ;; orig. yank-pop
-         ;; M-g bindings in `goto-map'
-         ("M-g e" . consult-compile-error)
-         ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
-         ("M-g g" . consult-goto-line)             ;; orig. goto-line
-         ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
-         ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
-         ("M-g m" . consult-mark)
-         ("M-g k" . consult-global-mark)
-         ("M-g i" . consult-imenu)
-         ("M-g I" . consult-imenu-multi)
-         ;; M-s bindings in `search-map'
-         ("M-s d" . consult-find)                  ;; Alternative: consult-fd
-         ("M-s c" . consult-locate)
-         ("M-s g" . consult-grep)
-         ("M-s G" . consult-git-grep)
-         ("M-s r" . consult-ripgrep)
-         ("M-s l" . consult-line)
-         ("M-s L" . consult-line-multi)
-         ("M-s k" . consult-keep-lines)
-         ("M-s u" . consult-focus-lines)
-         ;; Isearch integration
-         ("M-s e" . consult-isearch-history)
-         :map isearch-mode-map
-         ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
-         ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
-         ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
-         ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
-         ;; Minibuffer history
-         :map minibuffer-local-map
-         ("M-s" . consult-history)                 ;; orig. next-matching-history-element
-         ("M-r" . consult-history))                ;; orig. previous-matching-history-element
+           ([remap Info-search] . consult-info)
+           ;; C-x bindings in `ctl-x-map'
+           ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
+           ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
+           ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+           ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
+           ("C-x t b" . consult-buffer-other-tab)    ;; orig. switch-to-buffer-other-tab
+           ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
+           ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
+           ;; Custom M-# bindings for fast register access
+           ("M-#" . consult-register-load)
+           ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
+           ("C-M-#" . consult-register)
+           ;; Other custom bindings
+           ("M-y" . consult-yank-pop)                ;; orig. yank-pop
+           ;; M-g bindings in `goto-map'
+           ("M-g e" . consult-compile-error)
+           ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
+           ("M-g g" . consult-goto-line)             ;; orig. goto-line
+           ("M-g o" . consult-org-heading)               ;; Alternative: consult-org-heading
+           ("M-g m" . consult-mark)
+           ("M-g k" . consult-global-mark)
+           ("M-g i" . consult-imenu)
+           ("M-g I" . consult-imenu-multi)
+           ;; M-s bindings in `search-map'
+           ("M-s d" . consult-find)                  ;; Alternative: consult-fd
+           ("M-s c" . consult-locate)
+           ("M-s g" . consult-grep)
+           ("M-s G" . consult-git-grep)
+           ("M-s r" . consult-ripgrep)
+           ("M-s l" . consult-line)
+           ("M-s L" . consult-line-multi)
+           ("M-s k" . consult-keep-lines)
+           ("M-s u" . consult-focus-lines)
+           ;; Isearch integration
+           ("M-s e" . consult-isearch-history)
+           :map isearch-mode-map
+           ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
+           ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
+           ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+           ;; Minibuffer history
+           :map minibuffer-local-map
+           ("M-s" . consult-history)                 ;; orig. next-matching-history-element
+)                ;; orig. previous-matching-history-element
 
-  ;; Enable automatic preview at point in the *Completions* buffer. This is
-  ;; relevant when you use the default completion UI.
-  :hook (completion-list-mode . consult-preview-at-point-mode)
+    ;; Enable automatic preview at point in the *Completions* buffer. This is
+    ;; relevant when you use the default completion UI.
+    :hook (completion-list-mode . consult-preview-at-point-mode)
 
-  ;; The :init configuration is always executed (Not lazy)
-  :init
+    ;; The :init configuration is always executed (Not lazy)
+    :init
 
-  ;; Optionally configure the register formatting. This improves the register
-  ;; preview for `consult-register', `consult-register-load',
-  ;; `consult-register-store' and the Emacs built-ins.
-  (setq register-preview-delay 0.5
-        register-preview-function #'consult-register-format)
+    ;; Optionally configure the register formatting. This improves the register
+    ;; preview for `consult-register', `consult-register-load',
+    ;; `consult-register-store' and the Emacs built-ins.
+    (setq register-preview-delay 0.5
+          register-preview-function #'consult-register-format)
 
-  ;; Optionally tweak the register preview window.
-  ;; This adds thin lines, sorting and hides the mode line of the window.
-  (advice-add #'register-preview :override #'consult-register-window)
+    ;; Optionally tweak the register preview window.
+    ;; This adds thin lines, sorting and hides the mode line of the window.
+    (advice-add #'register-preview :override #'consult-register-window)
 
-  ;; Use Consult to select xref locations with preview
-  (setq xref-show-xrefs-function #'consult-xref
-        xref-show-definitions-function #'consult-xref)
+    ;; Use Consult to select xref locations with preview
+    (setq xref-show-xrefs-function #'consult-xref
+          xref-show-definitions-function #'consult-xref)
 
-  ;; Configure other variables and modes in the :config section,
-  ;; after lazily loading the package.
-  :config
+    ;; Configure other variables and modes in the :config section,
+    ;; after lazily loading the package.
+    :config
 
-  ;; Optionally configure preview. The default value
-  ;; is 'any, such that any key triggers the preview.
-  ;; (setq consult-preview-key 'any)
-  ;; (setq consult-preview-key "M-.")
-  ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
-  ;; For some commands and buffer sources it is useful to configure the
-  ;; :preview-key on a per-command basis using the `consult-customize' macro.
-  (consult-customize
-   consult-theme :preview-key '(:debounce 0.2 any)
-   consult-ripgrep consult-git-grep consult-grep
-   consult-bookmark consult-recent-file consult-xref
-   consult--source-bookmark consult--source-file-register
-   consult--source-recent-file consult--source-project-recent-file
-   ;; :preview-key "M-."
-   :preview-key '(:debounce 0.4 any))
+    ;; Optionally configure preview. The default value
+    ;; is 'any, such that any key triggers the preview.
+    ;; (setq consult-preview-key 'any)
+    ;; (setq consult-preview-key "M-.")
+    ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
+    ;; For some commands and buffer sources it is useful to configure the
+    ;; :preview-key on a per-command basis using the `consult-customize' macro.
+    (consult-customize
+     consult-theme :preview-key '(:debounce 0.2 any)
+     consult-ripgrep consult-git-grep consult-grep
+     consult-bookmark consult-recent-file consult-xref
+     consult--source-bookmark consult--source-file-register
+     consult--source-recent-file consult--source-project-recent-file
+     ;; :preview-key "M-."
+     :preview-key '(:debounce 0.4 any))
 
-  ;; Optionally configure the narrowing key.
-  ;; Both < and C-+ work reasonably well.
-  (setq consult-narrow-key "<") ;; "C-+"
+    ;; Optionally configure the narrowing key.
+    ;; Both < and C-+ work reasonably well.
+    (setq consult-narrow-key "<") ;; "C-+"
 
-  ;; Optionally make narrowing help available in the minibuffer.
-  ;; You may want to use `embark-prefix-help-command' or which-key instead.
-  ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
-)
+    ;; Optionally make narrowing help available in the minibuffer.
+    ;; You may want to use `embark-prefix-help-command' or which-key instead.
+    ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
+  )
 #+END_SRC 
 
-#+RESULTS:
-: consult-history
