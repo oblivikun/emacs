@@ -22,7 +22,7 @@
 			:config
 		  (gcmh-mode 1))
 
-(setq user-exwm t) 
+(setq user-exwm nil) 
           (setq user-vertico t)
 (setq user-consult t)
   (setq user-ivy nil)
@@ -48,12 +48,11 @@
 (setenv "IN_EMACS" "1")
 
 (use-package dirvish
-   :commands (dirvish) ;; Specify the command to load Dirvish
-   :config
+   :init
  (dirvish-override-dired-mode)
- :bind
- 
-:bind (("C-x d" . dirvish-dispatch))
+:bind (("M-g d" . dirvish-dispatch)
+	("C-x d" . dirvish )
+	)
    )
 
 (use-package treemacs
@@ -556,8 +555,6 @@ Defaults to Sly because it has better integration with Nyxt."
        read
        eval))
 
-(provide 'emacs-with-nyxt)
-
 (use-package lsp-mode
   :init
   (setq lsp-keymap-prefix "C-c l")
@@ -587,11 +584,6 @@ Defaults to Sly because it has better integration with Nyxt."
  :hook (lsp-mode . lsp-ui-mode))
 
 ;; if you are ivy user
-
-;; (add-hook 'prog-mode-hook #'eglot-ensure)
-;; (with-eval-after-load 'eglot
-;;  (add-to-list 'eglot-server-programs
-;;                '(emacs-lisp-mode . ("emacs-lsp" "--stdio"))))
 
 (defun open-terminal-at-bottom ()
 (interactive)
@@ -735,22 +727,6 @@ Defaults to Sly because it has better integration with Nyxt."
           (lambda ()
             (local-set-key (kbd "C-c C-o") 'markdown-export-to-html-and-open-in-nyxt)))
 
-(defun loadup-gen ()
-(interactive)
-(defun get-loads-from-*Messages* ()
-	  (save-excursion
-	    (let ((retval ()))
-	      (set-buffer "*Messages*")
-	      (beginning-of-buffer)
-	      (while (search-forward-regexp "^Loading " nil t)
-		(let ((start (point)))
-		  (search-forward "...")
-		  (backward-char 3)
-		  (setq retval (cons (buffer-substring-no-properties start (point)) retval))))
-	      retval)))
-(dolist (file (get-loads-from-*Messages*))
-	  (princ (format "(load \"%s\")\n" file))))
-
 (let ((backup-dir "~/.emacs.d/backups")
     (auto-saves-dir "~/.emacs.d/autosaves"))
 (dolist (dir (list backup-dir auto-saves-dir))
@@ -762,17 +738,6 @@ Defaults to Sly because it has better integration with Nyxt."
       auto-save-list-file-prefix (concat auto-saves-dir ".saves-")
       tramp-backup-directory-alist `((".*" . ,backup-dir))
       tramp-auto-save-directory auto-saves-dir))
-
-(defun dump-load-path ()
-  (interactive)
-  (with-temp-buffer
-    (insert (prin1-to-string `(setq load-path ',load-path)))
-    (fill-region (point-min) (point-max))
-    (write-file "~/.emacs.d/load-path.el")))
-
-(defun dump-emacs ()
-  (interactive)
-  (shell-command "emacs --batch -l ~/.edump -eval '(dump-load-path)' -eval '(dump-emacs-portable \"~/emacs.dump\")'"))
 
 (use-package undo-tree
 :init
@@ -837,9 +802,6 @@ Defaults to Sly because it has better integration with Nyxt."
   )
 
   (setq message-send-mail-function 'smtpmail-send-it)
-
-;; (use-package epa-file
-;; (epa-file-enable)
 
 (use-package org-mime
    :commands (org-mime-htmlize)
@@ -975,33 +937,31 @@ Defaults to Sly because it has better integration with Nyxt."
 (global-set-key (kbd "C-c l") 'select-line)
 
 (use-package vertico
-    :if user-vertico
-          :ensure t
-          :bind (:map vertico-map
-                 ("C-j" . vertico-next)
-                 ("C-k" . vertico-previous)
-                 ("C-f" . vertico-exit)
-                 :map minibuffer-local-map
-                 ("M-h" . backward-kill-word))
-          :custom
-          (vertico-cycle t)
-          :init
-          (vertico-mode))
+:if user-vertico
+      :ensure t
+      :bind (:map vertico-map
+             ("C-j" . vertico-next)
+             ("C-k" . vertico-previous)
+             ("C-f" . vertico-exit)
+             :map minibuffer-local-map
+             ("M-h" . backward-kill-word))
+      :custom
+      (vertico-cycle t)
+      :init
+      (vertico-mode))
 
-        (use-package savehist
-          :init
-          (savehist-mode))
+(use-package savehist
+  :init
+  (savehist-mode))
 
-        (use-package marginalia
-          :after vertico
-          :if user-vertico
-          :ensure t
-          :custom
-          (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
-          :init
-          (marginalia-mode))
-    
-             (use-package ivy
+(use-package marginalia
+  :ensure t
+  :custom
+  (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
+  :init
+  (marginalia-mode))
+
+(use-package ivy
 	       :if user-ivy
    :commands (counsel M-x counsel-git counsel-ag counsel-locate counsel-minibuffer-history counsel-describe-variable counsel-find-library counsel-unicode-char)
    :init
@@ -1045,15 +1005,10 @@ Defaults to Sly because it has better integration with Nyxt."
 
 (global-set-key (kbd "C-x C-k") 'kill-current-buffer)
 
-;; (use-package system-packages
-;;   :defer 20
-;;   :config
-;;  (setq system-packages-use-sudo t)
-;;  (setq system-packages-package-manager 'emerge))
-
 (add-hook 'markdown-mode-hook
           (lambda ()
             (local-set-key (kbd "C-c C-o") 'markdown-export-to-html-and-open-in-nyxt)))
+
 (use-package indent-guide
  :hook (python-mode . indent-guide-mode)
  :config
@@ -1067,26 +1022,8 @@ Defaults to Sly because it has better integration with Nyxt."
 (setq TeX-show-compilation nil)
 
 (use-package solarized-theme
-  :defer 10
   )
-
-(defun switch-theme-based-on-time ()
-  (interactive)
-  (let ((current-hour (string-to-number (format-time-string "%H"))))
-    (cond ((and (>= current-hour 14) (<= current-hour 20))
-           (disable-theme t)
-	   (message "switch")
-           (load-theme 'solarized-selenized-light  ))
-          ((and (>= current-hour 9) (<= current-hour 14))
-	   (disable-theme t)
-	   (message "switch")
-           (load-theme 'tango ))
-          (t ;; This is the else clause
-           (disable-theme t)
-	   (message "switch")
-           (load-theme 'solarized-selenized-dark ))))) ;; Load the default theme if none of the conditions are met
-
-    (run-at-time "00:00" (* 30 60) 'switch-theme-based-on-time)
+(load-theme 'solarized-selenized-black)
 
 (use-package guru-mode
 :init
@@ -1184,9 +1121,9 @@ Defaults to Sly because it has better integration with Nyxt."
   )
 
 (use-package exwm
-:demand t
-:if user-exwm
-:config
+  :demand t
+  :if user-exwm
+  :config
 
 (defun increase-brightness ()
     (interactive)
@@ -1213,10 +1150,6 @@ Defaults to Sly because it has better integration with Nyxt."
                          (shell-command "pamixer --toggle-mute"))
 
 
-
-(add-hook 'exwm-update-class-hook
-                             (lambda ()
-                               (exwm-workspace-rename-buffer exwm-class-name)))
 
 ;; These keys should always pass through to Emacs
 (setq exwm-input-prefix-keys
@@ -1312,37 +1245,40 @@ Defaults to Sly because it has better integration with Nyxt."
                         (exwm-input-set-key (kbd "<XF86AudioLowerVolume>") 'decrease-volume)
                         (exwm-input-set-key (kbd "<XF86AudioMute>") 'toggle-volume)
 
+(defun run-in-background (command)
+  (let ((command-parts (split-string command "[ ]+")))
+    (apply #'call-process `(,(car command-parts) nil 0 nil ,@(cdr command-parts)))))
+
 (defun exwm-update-class ()
-                  (exwm-workspace-rename-buffer exwm-class-name))
+    (exwm-workspace-rename-buffer exwm-class-name))
 
-                (defun exwm-update-title ()
-                  (pcase exwm-class-name
-                    ("Firefox" (exwm-workspace-rename-buffer (format "Firefox: %s" exwm-title)))))
-                
-              (add-hook 'exwm-update-class-hook #'exwm-update-class)
+  (defun exwm-update-title ()
+    (pcase exwm-class-name
+      ("Firefox" (exwm-workspace-rename-buffer (format "Firefox: %s" exwm-title)))))
+  
+(add-hook 'exwm-update-class-hook #'exwm-update-class)
 
-              ;; When window title updates, use it to set the buffer name
-              (add-hook 'exwm-update-title-hook #'exwm-update-title)
+;; When window title updates, use it to set the buffer name
+(add-hook 'exwm-update-title-hook #'exwm-update-title)
+
 (require 'exwm-randr)
 
     (exwm-randr-enable)
             (setq exwm-workspace-show-all-buffers t)
         (setq exwm-randr-workspace-monitor-plist '(2 "eDP1" 3 "HDMI2"))
 
-    (defun run-in-background (command)
-      (let ((command-parts (split-string command "[ ]+")))
-        (apply #'call-process `(,(car command-parts) nil 0 nil ,@(cdr command-parts)))))
 
-    (defun set-wallpaper ()
-      (interactive)
-      ;; NOTE: You will need to update this to a valid background path!
-      (start-process-shell-command
-          "feh" nil  "feh --bg-tile ~/Pictures/wal2.png"))
-        (defun update-displays ()
-              (run-in-background "autorandr --change --force")
-              (set-wallpaper)
-              (message "Display config: %s"
-                       (string-trim (shell-command-to-string "autorandr --current"))))
+            (defun update-displays ()
+            (run-in-background "autorandr --change --force")
+            (set-wallpaper)
+            (message "Display config: %s"
+                     (string-trim (shell-command-to-string "autorandr --current"))))
+
+(defun set-wallpaper ()
+  (interactive)
+  ;; NOTE: You will need to update this to a valid background path!
+  (start-process-shell-command
+      "feh" nil  "feh --bg-tile ~/Pictures/wal2.png"))
 
 (use-package exwm-modeline
       :after (exwm))
@@ -1369,108 +1305,113 @@ Defaults to Sly because it has better integration with Nyxt."
 (my-add-volume-indicator-to-mode-line)
 
 (use-package consult
-:if user-consult
-  ;; Replace bindings. Lazily loaded by `use-package'.
-  :bind (;; C-c bindings in `mode-specific-map'
-         ("C-c M-x" . consult-mode-command)
-         ("C-c h" . consult-history)
-         ("C-c k" . consult-kmacro)
-         ("C-c m" . consult-man)
-         ("C-c i" . consult-info)
+  :if user-consult
+    ;; Replace bindings. Lazily loaded by `use-package'.
+    :bind (;; C-c bindings in `mode-specific-map'
+           ("C-c M-x" . consult-mode-command)
+           ("C-c h" . consult-history)
+           ("C-c k" . consult-kmacro)
+           ("C-c m" . consult-man)
+           ("C-c i" . consult-info)
 
-         ([remap Info-search] . consult-info)
-         ;; C-x bindings in `ctl-x-map'
-         ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
-         ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
-         ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
-         ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
-         ("C-x t b" . consult-buffer-other-tab)    ;; orig. switch-to-buffer-other-tab
-         ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
-         ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
-         ;; Custom M-# bindings for fast register access
-         ("M-#" . consult-register-load)
-         ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
-         ("C-M-#" . consult-register)
-         ;; Other custom bindings
-         ("M-y" . consult-yank-pop)                ;; orig. yank-pop
-         ;; M-g bindings in `goto-map'
-         ("M-g e" . consult-compile-error)
-         ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
-         ("M-g g" . consult-goto-line)             ;; orig. goto-line
-         ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
-         ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
-         ("M-g m" . consult-mark)
-         ("M-g k" . consult-global-mark)
-         ("M-g i" . consult-imenu)
-         ("M-g I" . consult-imenu-multi)
-         ;; M-s bindings in `search-map'
-         ("M-s d" . consult-find)                  ;; Alternative: consult-fd
-         ("M-s c" . consult-locate)
-         ("M-s g" . consult-grep)
-         ("M-s G" . consult-git-grep)
-         ("M-s r" . consult-ripgrep)
-         ("M-s l" . consult-line)
-         ("M-s L" . consult-line-multi)
-         ("M-s k" . consult-keep-lines)
-         ("M-s u" . consult-focus-lines)
-         ;; Isearch integration
-         ("M-s e" . consult-isearch-history)
-         :map isearch-mode-map
-         ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
-         ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
-         ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
-         ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
-         ;; Minibuffer history
-         :map minibuffer-local-map
-         ("M-s" . consult-history)                 ;; orig. next-matching-history-element
-         ("M-r" . consult-history))                ;; orig. previous-matching-history-element
+           ([remap Info-search] . consult-info)
+           ;; C-x bindings in `ctl-x-map'
+           ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
+           ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
+           ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+           ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
+           ("C-x t b" . consult-buffer-other-tab)    ;; orig. switch-to-buffer-other-tab
+           ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
+           ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
+           ;; Custom M-# bindings for fast register access
+           ("M-#" . consult-register-load)
+           ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
+           ("C-M-#" . consult-register)
+           ;; Other custom bindings
+           ("M-y" . consult-yank-pop)                ;; orig. yank-pop
+           ;; M-g bindings in `goto-map'
+           ("M-g e" . consult-compile-error)
+           ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
+           ("M-g g" . consult-goto-line)             ;; orig. goto-line
+           ("M-g o" . consult-org-heading)               ;; Alternative: consult-org-heading
+           ("M-g m" . consult-mark)
+           ("M-g k" . consult-global-mark)
+           ("M-g i" . consult-imenu)
+           ("M-g I" . consult-imenu-multi)
+           ;; M-s bindings in `search-map'
+           ("M-s d" . consult-find)                  ;; Alternative: consult-fd
+           ("M-s c" . consult-locate)
+           ("M-s g" . consult-grep)
+           ("M-s G" . consult-git-grep)
+           ("M-s r" . consult-ripgrep)
+           ("M-s l" . consult-line)
+           ("M-s L" . consult-line-multi)
+           ("M-s k" . consult-keep-lines)
+           ("M-s u" . consult-focus-lines)
+           ;; Isearch integration
+           ("M-s e" . consult-isearch-history)
+           :map isearch-mode-map
+           ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
+           ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
+           ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+           ;; Minibuffer history
+           :map minibuffer-local-map
+           ("M-s" . consult-history)                 ;; orig. next-matching-history-element
+)                ;; orig. previous-matching-history-element
 
-  ;; Enable automatic preview at point in the *Completions* buffer. This is
-  ;; relevant when you use the default completion UI.
-  :hook (completion-list-mode . consult-preview-at-point-mode)
+    ;; Enable automatic preview at point in the *Completions* buffer. This is
+    ;; relevant when you use the default completion UI.
+    :hook (completion-list-mode . consult-preview-at-point-mode)
 
-  ;; The :init configuration is always executed (Not lazy)
+    ;; The :init configuration is always executed (Not lazy)
+    :init
+
+    ;; Optionally configure the register formatting. This improves the register
+    ;; preview for `consult-register', `consult-register-load',
+    ;; `consult-register-store' and the Emacs built-ins.
+    (setq register-preview-delay 0.5
+          register-preview-function #'consult-register-format)
+
+    ;; Optionally tweak the register preview window.
+    ;; This adds thin lines, sorting and hides the mode line of the window.
+    (advice-add #'register-preview :override #'consult-register-window)
+
+    ;; Use Consult to select xref locations with preview
+    (setq xref-show-xrefs-function #'consult-xref
+          xref-show-definitions-function #'consult-xref)
+
+    ;; Configure other variables and modes in the :config section,
+    ;; after lazily loading the package.
+    :config
+
+    ;; Optionally configure preview. The default value
+    ;; is 'any, such that any key triggers the preview.
+    ;; (setq consult-preview-key 'any)
+    ;; (setq consult-preview-key "M-.")
+    ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
+    ;; For some commands and buffer sources it is useful to configure the
+    ;; :preview-key on a per-command basis using the `consult-customize' macro.
+    (consult-customize
+     consult-theme :preview-key '(:debounce 0.2 any)
+     consult-ripgrep consult-git-grep consult-grep
+     consult-bookmark consult-recent-file consult-xref
+     consult--source-bookmark consult--source-file-register
+     consult--source-recent-file consult--source-project-recent-file
+     ;; :preview-key "M-."
+     :preview-key '(:debounce 0.4 any))
+
+    ;; Optionally configure the narrowing key.
+    ;; Both < and C-+ work reasonably well.
+    (setq consult-narrow-key "<") ;; "C-+"
+
+    ;; Optionally make narrowing help available in the minibuffer.
+    ;; You may want to use `embark-prefix-help-command' or which-key instead.
+    ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
+  )
+
+(use-package which-key
   :init
-
-  ;; Optionally configure the register formatting. This improves the register
-  ;; preview for `consult-register', `consult-register-load',
-  ;; `consult-register-store' and the Emacs built-ins.
-  (setq register-preview-delay 0.5
-        register-preview-function #'consult-register-format)
-
-  ;; Optionally tweak the register preview window.
-  ;; This adds thin lines, sorting and hides the mode line of the window.
-  (advice-add #'register-preview :override #'consult-register-window)
-
-  ;; Use Consult to select xref locations with preview
-  (setq xref-show-xrefs-function #'consult-xref
-        xref-show-definitions-function #'consult-xref)
-
-  ;; Configure other variables and modes in the :config section,
-  ;; after lazily loading the package.
+  (which-key-mode)
   :config
-
-  ;; Optionally configure preview. The default value
-  ;; is 'any, such that any key triggers the preview.
-  ;; (setq consult-preview-key 'any)
-  ;; (setq consult-preview-key "M-.")
-  ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
-  ;; For some commands and buffer sources it is useful to configure the
-  ;; :preview-key on a per-command basis using the `consult-customize' macro.
-  (consult-customize
-   consult-theme :preview-key '(:debounce 0.2 any)
-   consult-ripgrep consult-git-grep consult-grep
-   consult-bookmark consult-recent-file consult-xref
-   consult--source-bookmark consult--source-file-register
-   consult--source-recent-file consult--source-project-recent-file
-   ;; :preview-key "M-."
-   :preview-key '(:debounce 0.4 any))
-
-  ;; Optionally configure the narrowing key.
-  ;; Both < and C-+ work reasonably well.
-  (setq consult-narrow-key "<") ;; "C-+"
-
-  ;; Optionally make narrowing help available in the minibuffer.
-  ;; You may want to use `embark-prefix-help-command' or which-key instead.
-  ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
-)
+  (setq which-key-idle-delay 0.1)
+  (which-key-setup-side-window-right))

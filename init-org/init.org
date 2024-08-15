@@ -40,7 +40,7 @@ and do more performance tweaks. - moved to early-init.el
 *** Personal stuff
 **** config values
 #+BEGIN_SRC emacs-lisp
-    (setq user-exwm t) 
+    (setq user-exwm nil) 
             (setq user-vertico t)
   (setq user-consult t)
     (setq user-ivy nil)
@@ -1283,27 +1283,10 @@ system-packages, usefull package so i can watch my libraries compile(i use gento
 **** Theming
 Switch themes at certain times
 #+BEGIN_SRC emacs-lisp
-(use-package solarized-theme
-  :defer 10
-  )
+  (use-package solarized-theme
+    )
+  (load-theme 'solarized-selenized-black)
 
-(defun switch-theme-based-on-time ()
-  (interactive)
-  (let ((current-hour (string-to-number (format-time-string "%H"))))
-    (cond ((and (>= current-hour 14) (<= current-hour 20))
-           (disable-theme t)
-	   (message "switch")
-           (load-theme 'solarized-selenized-light  ))
-          ((and (>= current-hour 9) (<= current-hour 14))
-	   (disable-theme t)
-	   (message "switch")
-           (load-theme 'tango ))
-          (t ;; This is the else clause
-           (disable-theme t)
-	   (message "switch")
-           (load-theme 'solarized-selenized-dark ))))) ;; Load the default theme if none of the conditions are met
-
-    (run-at-time "00:00" (* 30 60) 'switch-theme-based-on-time)
 #+END_SRC
 **** Guru mode because i have bad habits
 #+BEGIN_SRC emacs-lisp
@@ -1723,7 +1706,7 @@ Uses pamixer
 | M-g i   | consult-imenu               | Jump to a place in the buffer chosen using a buffer menu or mouse menu |
 | M-g I   | consult-imenu-multi         | Select item from the imenus of all buffers from the same project       |
 | M-s d   | consult-find                | Search files with find in a directory                                  |
-| M-s c   | consult-locate              | Search for files with locate that match given initial input            |
+| M-s c   | consult-locate              | Search for files with -locate that match given initial input           |
 | M-s g   | consult-grep                | Search with grep for files in a directory                              |
 | M-s G   | consult-git-grep            | Search with git grep for files in a directory given initial input      |
 | M-s r   | consult-ripgrep             | Search with rg for files in a directory given initial input            |
@@ -1848,4 +1831,15 @@ Shamelessly taken from example
     ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
   )
 #+END_SRC 
+
+** Which Key
+Very nice
+#+BEGIN_SRC emacs-lisp
+  (use-package which-key
+    :init
+    (which-key-mode)
+    :config
+    (setq which-key-idle-delay 0.1)
+    (which-key-setup-side-window-right))
+#+END_SRC
 

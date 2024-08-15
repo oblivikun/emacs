@@ -78,9 +78,9 @@
 
 (push '(tool-bar-lines . 0)   default-frame-alist)
 (push '(vertical-scroll-bars) default-frame-alist)
-(setq menu-bar-mode nil
+(setq menu-bar-mode t
       tool-bar-mode nil
-      scroll-bar-mode nil)
+      scroll-bar-mode nil) 
 
 (setq inhibit-compacting-font-caches t)
 
