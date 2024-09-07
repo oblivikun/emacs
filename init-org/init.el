@@ -41,9 +41,6 @@
           (add-hook 'prog-mode-hook 'display-line-numbers-mode)
   
 (setq display-line-numbers-type 'relative)
-    
-
-  (setq org-startup-indented t)
 
 (setenv "IN_EMACS" "1")
 
@@ -179,51 +176,65 @@
   )
 
 (setq mode-line-end-spaces
-         '(""
-           display-time-string
-           battery-mode-line-string
- 	  "GNU Emacs 29.3"
- 	      ))
- (defun my-modeline-god-mode-indicator ()
-"Return a string indicating God Mode status for the mode line."
-(if god-local-mode
-     "  "
-   "  "))
-     (defun my-mode-line/padding ()
-     (let ((r-length (length (format-mode-line mode-line-end-spaces))))
-       (propertize " "
-         'display `(space :align-to (- right ,r-length)))))
- (setq-default mode-line-format
-   '("%e"
-      " %o "
-      "%* "
-      my-modeline-buffer-name
-      my-modeline-major-mode
-            (:eval (my-mode-line/padding))
-	    
-  (:eval (my-modeline-god-mode-indicator))
-       mode-line-end-spaces))
-   
-   
+           '(""
+             display-time-string
+             battery-mode-line-string
+   	  "GNU Emacs 29.3"
+   	      ))
+   (defun my-modeline-god-mode-indicator ()
+  "Return a string indicating God Mode status for the mode line."
+  (if god-local-mode
+       "  "
+     "  "))
+       (defun my-mode-line/padding ()
+       (let ((r-length (length (format-mode-line mode-line-end-spaces))))
+         (propertize " "
+           'display `(space :align-to (- right ,r-length)))))
+   (setq-default mode-line-format
+     '("%e"
+        " %o "
+        "%* "
+        my-modeline-buffer-name
+        my-modeline-major-mode
+              (:eval (my-mode-line/padding))
+  	    
+    (:eval (my-modeline-god-mode-indicator))
+         mode-line-end-spaces))
+     
+     
 
- (defvar-local my-modeline-buffer-name
-   '(:eval
-      (when (mode-line-window-selected-p)
-        (propertize (format " %s " (buffer-name))
-          'face '(t :background "#3355bb" :foreground "white" :inherit bold))))
-   "Mode line construct to display the buffer name.")
+   (defvar-local my-modeline-buffer-name
+     '(:eval
+        (when (mode-line-window-selected-p)
+          (propertize (format " %s " (buffer-name))
+            'face '(t :background "#3355bb" :foreground "white" :inherit bold))))
+     "Mode line construct to display the buffer name.")
 
- (put 'my-modeline-buffer-name 'risky-local-variable t)
+   (put 'my-modeline-buffer-name 'risky-local-variable t)
+(defun my-get-mode-icon ()
+  "Return an icon for the current major mode."
+  (cond ((eq major-mode 'org-mode) "")
+        ((eq major-mode 'c-mode) "")
+        ((eq major-mode 'c++-mode) "")
+	((eq major-mode 'python-mode) "")
+	((eq major-mode 'ruby-mode) "")
+	((eq major-mode 'emacs-lisp-mode) "")
+	((eq major-mode 'dashboard-mode) "")
+	((eq major-mode 'haskell-mode) "")
+  	((eq major-mode 'sh-mode) "")
+    	((eq major-mode 'rust-mode) "")
+	((eq major-mode 'go-mode) "")
+        (t (capitalize (symbol-name major-mode)))))
 
- (defvar-local my-modeline-major-mode
-   '(:eval
-      (list
-        (propertize "λ" 'face 'shadow)
-        " "
-        (propertize (capitalize (symbol-name major-mode)) 'face 'bold)))
-   "Mode line construct to display the major mode.")
+(defvar-local my-modeline-major-mode
+  '(:eval
+     (list
+       (propertize "λ" 'face 'shadow)
+       " "
+       (propertize (my-get-mode-icon) 'face 'bold)))
+  "Mode line construct to display the major mode.")
 
- (put 'my-modeline-major-mode 'risky-local-variable t)
+   (put 'my-modeline-major-mode 'risky-local-variable t)
 
 (use-package company
  :defer 10
@@ -638,8 +649,7 @@ Defaults to Sly because it has better integration with Nyxt."
  ;; Additional configuration and custom functions can be added here
  )
 
-(setq org-hide-emphasis-markers t)
-    (font-lock-add-keywords 'org-mode
+(font-lock-add-keywords 'org-mode
                           '(("^ *\\([-]\\) "
                              (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
 (use-package olivetti
@@ -1415,3 +1425,73 @@ Defaults to Sly because it has better integration with Nyxt."
   :config
   (setq which-key-idle-delay 0.1)
   (which-key-setup-side-window-right))
+
+(setq use-short-answers t)
+
+(use-package spacious-padding
+  :custom
+  (line-spacing 2)
+  :init
+  (spacious-padding-mode 1))
+
+(use-package mixed-pitch
+  :hook
+  (text-mode . mixed-pitch-mode))
+
+(setq split-width-threshold 120
+      split-height-threshold nil)
+
+(use-package balanced-windows
+  :config
+  (balanced-windows-mode))
+
+(use-package helpful
+  :bind
+  (("C-h f" . helpful-function)
+   ("C-h x" . helpful-command)
+   ("C-h k" . helpful-key)
+   ("C-h v" . helpful-variable)))
+
+(add-hook 'text-mode-hook 'visual-line-mode)
+
+(use-package org
+    :custom
+    (org-startup-indented t)
+    (org-hide-emphasis-markers t)
+    (org-startup-with-inline-images t)
+    (org-image-actual-width '(450))
+    (org-fold-catch-invisible-edits 'error)
+    (org-pretty-entities t)
+    (org-use-sub-superscripts "{}")
+    (org-id-link-to-org-use-id t)
+    (org-fold-catch-invisible-edits 'show))
+
+
+(use-package org-fragtog
+  :after org
+  :hook
+  (org-mode . org-fragtog-mode)
+  :custom
+  (org-startup-with-latex-preview nil)
+  (org-format-latex-options
+   (plist-put org-format-latex-options :scale 2)
+   (plist-put org-format-latex-options :foreground 'auto)
+   (plist-put org-format-latex-options :background 'auto)))
+
+(use-package org-modern
+  :hook
+  (org-mode . org-modern-mode)
+  :custom
+  (org-modern-table nil)
+  (org-modern-keyword nil)
+  (org-modern-timestamp nil)
+  (org-modern-priority nil)
+  (org-modern-checkbox nil)
+  (org-modern-tag nil)
+  (org-modern-block-name nil)
+  (org-modern-keyword nil)
+  (org-modern-footnote nil)
+  (org-modern-internal-target nil)
+  (org-modern-radio-target nil)
+  (org-modern-statistics nil)
+  (org-modern-progress nil))

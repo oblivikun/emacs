@@ -66,7 +66,6 @@ and do more performance tweaks. - moved to early-init.el
   (setq display-line-numbers-type 'relative)
       
 
-    (setq org-startup-indented t)
 
 #+END_SRC
 
@@ -232,52 +231,66 @@ Most of these are deffered to optimize startup time.
  #+END_SRC
 **** Modeline
 #+BEGIN_SRC emacs-lisp
-       (setq mode-line-end-spaces
-           '(""
-             display-time-string
-             battery-mode-line-string
-   	  "GNU Emacs 29.3"
-   	      ))
-   (defun my-modeline-god-mode-indicator ()
-  "Return a string indicating God Mode status for the mode line."
-  (if god-local-mode
-       "  "
-     "  "))
-       (defun my-mode-line/padding ()
-       (let ((r-length (length (format-mode-line mode-line-end-spaces))))
-         (propertize " "
-           'display `(space :align-to (- right ,r-length)))))
-   (setq-default mode-line-format
-     '("%e"
-        " %o "
-        "%* "
-        my-modeline-buffer-name
-        my-modeline-major-mode
-              (:eval (my-mode-line/padding))
-  	    
-    (:eval (my-modeline-god-mode-indicator))
-         mode-line-end-spaces))
-     
-     
+         (setq mode-line-end-spaces
+             '(""
+               display-time-string
+               battery-mode-line-string
+     	  "GNU Emacs 29.3"
+     	      ))
+     (defun my-modeline-god-mode-indicator ()
+    "Return a string indicating God Mode status for the mode line."
+    (if god-local-mode
+         "  "
+       "  "))
+         (defun my-mode-line/padding ()
+         (let ((r-length (length (format-mode-line mode-line-end-spaces))))
+           (propertize " "
+             'display `(space :align-to (- right ,r-length)))))
+     (setq-default mode-line-format
+       '("%e"
+          " %o "
+          "%* "
+          my-modeline-buffer-name
+          my-modeline-major-mode
+                (:eval (my-mode-line/padding))
+    	    
+      (:eval (my-modeline-god-mode-indicator))
+           mode-line-end-spaces))
+       
+       
 
-   (defvar-local my-modeline-buffer-name
-     '(:eval
-        (when (mode-line-window-selected-p)
-          (propertize (format " %s " (buffer-name))
-            'face '(t :background "#3355bb" :foreground "white" :inherit bold))))
-     "Mode line construct to display the buffer name.")
+     (defvar-local my-modeline-buffer-name
+       '(:eval
+          (when (mode-line-window-selected-p)
+            (propertize (format " %s " (buffer-name))
+              'face '(t :background "#3355bb" :foreground "white" :inherit bold))))
+       "Mode line construct to display the buffer name.")
 
-   (put 'my-modeline-buffer-name 'risky-local-variable t)
+     (put 'my-modeline-buffer-name 'risky-local-variable t)
+  (defun my-get-mode-icon ()
+    "Return an icon for the current major mode."
+    (cond ((eq major-mode 'org-mode) "")
+          ((eq major-mode 'c-mode) "")
+          ((eq major-mode 'c++-mode) "")
+  	((eq major-mode 'python-mode) "")
+  	((eq major-mode 'ruby-mode) "")
+  	((eq major-mode 'emacs-lisp-mode) "")
+  	((eq major-mode 'dashboard-mode) "")
+  	((eq major-mode 'haskell-mode) "")
+    	((eq major-mode 'sh-mode) "")
+      	((eq major-mode 'rust-mode) "")
+  	((eq major-mode 'go-mode) "")
+          (t (capitalize (symbol-name major-mode)))))
 
-   (defvar-local my-modeline-major-mode
-     '(:eval
-        (list
-          (propertize "λ" 'face 'shadow)
-          " "
-          (propertize (capitalize (symbol-name major-mode)) 'face 'bold)))
-     "Mode line construct to display the major mode.")
+  (defvar-local my-modeline-major-mode
+    '(:eval
+       (list
+         (propertize "λ" 'face 'shadow)
+         " "
+         (propertize (my-get-mode-icon) 'face 'bold)))
+    "Mode line construct to display the major mode.")
 
-   (put 'my-modeline-major-mode 'risky-local-variable t)
+     (put 'my-modeline-major-mode 'risky-local-variable t)
 #+END_SRC
 **** Company for auto completions. I really like this package :)
 #+BEGIN_SRC emacs-lisp
@@ -794,7 +807,6 @@ MAKE SURE TO MAKE THE DIRECTORY ~/roam
   #+END_SRC
 **** Make Org more beautifull
 #+BEGIN_SRC emacs-lisp
-    (setq org-hide-emphasis-markers t)
       (font-lock-add-keywords 'org-mode
                             '(("^ *\\([-]\\) "
                                (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
@@ -1843,3 +1855,95 @@ Very nice
     (which-key-setup-side-window-right))
 #+END_SRC
 
+** Style stuff
+Short answers
+#+BEGIN_SRC emacs-lisp
+(setq use-short-answers t)
+#+END_SRC
+Padding
+#+BEGIN_SRC emacs-lisp
+(use-package spacious-padding
+  :custom
+  (line-spacing 2)
+  :init
+  (spacious-padding-mode 1))
+#+END_SRC
+Mixed pich
+#+BEGIN_SRC emacs-lisp
+
+(use-package mixed-pitch
+  :hook
+  (text-mode . mixed-pitch-mode))
+
+#+END_SRC
+Split stuff well
+#+BEGIN_SRC emacs-lisp
+(setq split-width-threshold 120
+      split-height-threshold nil)
+
+(use-package balanced-windows
+  :config
+  (balanced-windows-mode))
+
+#+END_SRC
+Better help
+#+BEGIN_SRC emacs-lisp
+
+(use-package helpful
+  :bind
+  (("C-h f" . helpful-function)
+   ("C-h x" . helpful-command)
+   ("C-h k" . helpful-key)
+   ("C-h v" . helpful-variable)))
+
+#+END_SRC
+Text mode settings
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'text-mode-hook 'visual-line-mode)
+#+END_SRC
+Org mode config
+#+BEGIN_SRC emacs-lisp
+
+
+  (use-package org
+    :custom
+    (org-startup-indented t)
+    (org-hide-emphasis-markers t)
+    (org-startup-with-inline-images t)
+    (org-image-actual-width '(450))
+    (org-fold-catch-invisible-edits 'error)
+    (org-pretty-entities t)
+    (org-use-sub-superscripts "{}")
+    (org-id-link-to-org-use-id t)
+    (org-fold-catch-invisible-edits 'show))
+
+
+(use-package org-fragtog
+  :after org
+  :hook
+  (org-mode . org-fragtog-mode)
+  :custom
+  (org-startup-with-latex-preview nil)
+  (org-format-latex-options
+   (plist-put org-format-latex-options :scale 2)
+   (plist-put org-format-latex-options :foreground 'auto)
+   (plist-put org-format-latex-options :background 'auto)))
+
+(use-package org-modern
+  :hook
+  (org-mode . org-modern-mode)
+  :custom
+  (org-modern-table nil)
+  (org-modern-keyword nil)
+  (org-modern-timestamp nil)
+  (org-modern-priority nil)
+  (org-modern-checkbox nil)
+  (org-modern-tag nil)
+  (org-modern-block-name nil)
+  (org-modern-keyword nil)
+  (org-modern-footnote nil)
+  (org-modern-internal-target nil)
+  (org-modern-radio-target nil)
+  (org-modern-statistics nil)
+  (org-modern-progress nil))
+#+END_SRC
